@@ -1,0 +1,7 @@
+Source for deepin-qt5dxcb-plugin
+--------------------------------
+
+Bundled Qt private headers are removed in favor of headers
+provided by the system.
+
+ -- Boyuan Yang <073plan@gmail.com>  Wed, 13 Dec 2017 15:44:13 +0800

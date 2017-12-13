@@ -1,9 +1,17 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: qt5integration
-Source: https://github.com/linuxdeepin/qt5integration
+Upstream-Name: qt5dxcb-plugin
+Source: https://github.com/linuxdeepin/qt5dxcb-plugin
+Files-Excluded: platformplugin/libqt5xcbqpa-dev/*
 
 Files: *
-Copyright: 2017 Deepin.Inc <support@deepin.com>
+Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
+License: GPL-3+
+
+Files: debian/*
+Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
+           2017 Boyuan Yang <073plan@gmail.com>
+License: GPL-3+
+
 License: GPL-3+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
