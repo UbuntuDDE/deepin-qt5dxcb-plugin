@@ -1,4 +1,4 @@
-Source: qt5dxcb-plugin
+Source: deepin-qt5dxcb-plugin
 Section: devel
 Priority: optional
 Maintainer: Debian Deepin Packaging Team <pkg-deepin-devel@lists.alioth.debian.org>
