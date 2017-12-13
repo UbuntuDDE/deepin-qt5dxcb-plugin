@@ -42,7 +42,7 @@ Provides:
 Conflicts:
  libqt5dxcb-plugin,
 Breaks:
- dde-qt5integration (< 0.2.8.1),
+ dde-qt5integration (<< 0.2.8.1),
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
