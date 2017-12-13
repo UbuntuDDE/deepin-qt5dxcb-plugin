@@ -1,4 +1,4 @@
 version=4
-opts="filenamemangle=s%(?:.*?)?v?(\d[\d.]*)\.tar\.gz%deepin-qt5dxcb-plugin-$1.tar.gz%" \
+opts="filenamemangle=s%(?:.*?)?v?(\d[\d.]*)\.tar\.gz%deepin-qt5dxcb-plugin-$1.tar.gz%,dversionmangle=s/\+ds\d*$//,pgpmode=none," \
  https://github.com/linuxdeepin/qt5dxcb-plugin/tags \
  (?:.*?/)?(\d[\d.]*)\.tar\.gz debian uupdate

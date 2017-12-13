@@ -17,7 +17,7 @@ export QT_SELECT := 5
 
 
 %:
-	dh $@ 
+	dh $@
 
 # libQt5XcbQpa plugin is problematic
 #override_dh_shlibdeps:
