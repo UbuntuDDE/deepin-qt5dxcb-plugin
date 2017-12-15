@@ -329,7 +329,11 @@ void DPlatformWindowHelper::setWindowFlags(Qt::WindowFlags flags)
     window()->QNativeWindow::setWindowFlags(flags);
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
 void DPlatformWindowHelper::setWindowState(Qt::WindowState state)
+#else
+void DPlatformWindowHelper::setWindowState(Qt::WindowStates state)
+#endif
 {
 #ifdef Q_OS_LINUX
     DQNativeWindow *window = static_cast<DQNativeWindow*>(me()->m_frameWindow->handle());
@@ -349,7 +353,11 @@ void DPlatformWindowHelper::setWindowState(Qt::WindowState state)
     } else
 #endif
     {
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
         me()->m_frameWindow->setWindowState(state);
+#else
+        me()->m_frameWindow->setWindowStates(state);
+#endif
     }
 }
 
@@ -443,7 +451,11 @@ void DPlatformWindowHelper::requestActivateWindow()
 #ifdef Q_OS_LINUX
     if (helper->m_frameWindow->handle()->isExposed() && !DXcbWMSupport::instance()->hasComposite()
             && helper->m_frameWindow->windowState() == Qt::WindowMinimized) {
+#ifdef Q_XCB_CALL
         Q_XCB_CALL(xcb_map_window(DPlatformIntegration::xcbConnection()->xcb_connection(), helper->m_frameWindow->winId()));
+#else
+        xcb_map_window(DPlatformIntegration::xcbConnection()->xcb_connection(), helper->m_frameWindow->winId());
+#endif
     }
 #endif
 
@@ -542,10 +554,12 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
             break;
         }
         case QEvent::MouseButtonPress:
-        case QEvent::MouseButtonRelease: {
+        case QEvent::MouseButtonRelease:
+        case QEvent::MouseMove: {
             DQMouseEvent *e = static_cast<DQMouseEvent*>(event);
 
             if (QRectF(m_windowVaildGeometry).contains(e->localPos() - m_frameWindow->contentOffsetHint())) {
+                m_frameWindow->setCursor(Qt::ArrowCursor);
                 e->l = e->w = m_nativeWindow->window()->mapFromGlobal(e->globalPos());
                 qApp->sendEvent(m_nativeWindow->window(), e);
 
@@ -619,43 +633,6 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
 
             if (e->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated)
                 m_frameWindow->create();
-
-            break;
-        }
-        case QEvent::DynamicPropertyChange: {
-            QDynamicPropertyChangeEvent *e = static_cast<QDynamicPropertyChangeEvent*>(event);
-
-            if (e->propertyName() == netWmStates) {
-//                m_store->onWindowStateChanged();
-            } else if (e->propertyName() == windowRadius) {
-                updateWindowRadiusFromProperty();
-            } else if (e->propertyName() == borderWidth) {
-                updateBorderWidthFromProperty();
-            } else if (e->propertyName() == borderColor) {
-                updateBorderColorFromProperty();
-            } else if (e->propertyName() == shadowRadius) {
-                updateShadowRadiusFromProperty();
-            } else if (e->propertyName() == shadowOffset) {
-                updateShadowOffsetFromProperty();
-            } else if (e->propertyName() == shadowColor) {
-                updateShadowColorFromProperty();
-            } else if (e->propertyName() == clipPath) {
-                updateClipPathFromProperty();
-            } else if (e->propertyName() == frameMask) {
-                updateFrameMaskFromProperty();
-            } else if (e->propertyName() == enableSystemResize) {
-                updateEnableSystemResizeFromProperty();
-            } else if (e->propertyName() == enableSystemMove) {
-                updateEnableSystemMoveFromProperty();
-            } else if (e->propertyName() == enableBlurWindow) {
-                updateEnableBlurWindowFromProperty();
-            } else if (e->propertyName() == windowBlurAreas) {
-                updateWindowBlurAreasFromProperty();
-            } else if (e->propertyName() == windowBlurPaths) {
-                updateWindowBlurPathsFromProperty();
-            } else if (e->propertyName() == autoInputMaskByClipPath) {
-                updateAutoInputMaskByClipPathFromProperty();
-            }
 
             break;
         }
@@ -777,7 +754,12 @@ bool DPlatformWindowHelper::updateWindowBlurAreasForWM()
         return Utility::blurWindowBackground(top_level_w, newAreas);
     }
 
-    if (!m_isUserSetClipPath && m_windowRadius <=0 && m_blurPathList.isEmpty()) {
+    QPainterPath window_vaild_path;
+
+    window_vaild_path.addRect(QRect(offset, m_nativeWindow->QPlatformWindow::geometry().size()));
+    window_vaild_path &= (m_clipPath * device_pixel_ratio).translated(offset);
+
+    if (m_blurPathList.isEmpty()) {
         if (m_blurAreaList.isEmpty())
             return true;
 
@@ -786,41 +768,54 @@ bool DPlatformWindowHelper::updateWindowBlurAreasForWM()
         foreach (Utility::BlurArea area, m_blurAreaList) {
             area *= device_pixel_ratio;
 
-            if (area.x < 0) {
-                area.width += area.x;
-                area.x = 0;
-            }
-
-            if (area.y < 0) {
-                area.height += area.y;
-                area.y = 0;
-            }
-
-            area.width = qMin(area.x + area.width, windowValidRect.right() + 1) - area.x;
-            area.height = qMin(area.y + area.height, windowValidRect.bottom() + 1) - area.y;
             area.x += offset.x();
             area.y += offset.y();
+
+            QPainterPath path;
+
+            path.addRoundedRect(area.x, area.y, area.width, area.height,
+                                area.xRadius * device_pixel_ratio,
+                                area.yRaduis * device_pixel_ratio);
+
+            if (!window_vaild_path.contains(path)) {
+                const QPainterPath vaild_blur_path = window_vaild_path & path;
+                const QRectF vaild_blur_rect = vaild_blur_path.boundingRect();
+
+                if (path.boundingRect() != vaild_blur_rect) {
+                    area.x = vaild_blur_rect.x();
+                    area.y = vaild_blur_rect.y();
+                    area.width = vaild_blur_rect.width();
+                    area.height = vaild_blur_rect.height();
+
+                    path = QPainterPath();
+                    path.addRoundedRect(vaild_blur_rect.x(), vaild_blur_rect.y(),
+                                        vaild_blur_rect.width(), vaild_blur_rect.height(),
+                                        area.xRadius * device_pixel_ratio,
+                                        area.yRaduis * device_pixel_ratio);
+
+                    if (vaild_blur_path != path) {
+                        break;
+                    }
+                }
+            }
 
             newAreas.append(std::move(area));
         }
 
-        return Utility::blurWindowBackground(top_level_w, newAreas);
+        if (newAreas.size() == m_blurAreaList.size())
+            return Utility::blurWindowBackground(top_level_w, newAreas);
     }
 
     QList<QPainterPath> newPathList;
 
-    newPathList.reserve(newAreas.size());
-
-    QPainterPath window_vaild_path;
-
-    window_vaild_path.addRect(QRect(offset, m_nativeWindow->QPlatformWindow::geometry().size()));
-    window_vaild_path &= (m_clipPath * device_pixel_ratio).translated(offset);
+    newPathList.reserve(m_blurAreaList.size());
 
     foreach (Utility::BlurArea area, m_blurAreaList) {
         QPainterPath path;
 
         area *= device_pixel_ratio;
-        path.addRoundedRect(area.x + offset.x(), area.y + offset.y(), area.width, area.height, area.xRadius, area.yRaduis);
+        path.addRoundedRect(area.x + offset.x(), area.y + offset.y(), area.width, area.height,
+                            area.xRadius * device_pixel_ratio, area.yRaduis * device_pixel_ratio);
         path = path.intersected(window_vaild_path);
 
         if (!path.isEmpty())
@@ -866,8 +861,7 @@ void DPlatformWindowHelper::updateContentPathForFrameWindow()
 
 int DPlatformWindowHelper::getWindowRadius() const
 {
-    if (m_frameWindow->windowState() == Qt::WindowMaximized
-            || m_frameWindow->windowState() == Qt::WindowFullScreen)
+    if (m_frameWindow->windowState() == Qt::WindowFullScreen)
         return 0;
 
     return (m_isUserSetWindowRadius || DWMSupport::instance()->hasComposite()) ? m_windowRadius : 0;
@@ -1114,6 +1108,44 @@ void DPlatformWindowHelper::updateAutoInputMaskByClipPathFromProperty()
     }
 
     m_frameWindow->m_enableAutoInputMaskByContentPath = m_autoInputMaskByClipPath;
+}
+
+void DPlatformWindowHelper::setWindowProperty(QWindow *window, const char *name, const QVariant &value)
+{
+    const QVariant &old_value = window->property(name);
+
+    if (old_value == value)
+        return;
+
+    if (value.typeName() == QByteArray("QPainterPath")) {
+        const QPainterPath &old_path = qvariant_cast<QPainterPath>(old_value);
+        const QPainterPath &new_path = qvariant_cast<QPainterPath>(value);
+
+        if (old_path == new_path) {
+            return;
+        }
+    }
+
+    window->setProperty(name, value);
+
+    if (!mapped.value(window->handle()))
+        return;
+
+    QByteArray name_array(name);
+
+    if (!name_array.startsWith("_d_"))
+        return;
+
+    // to upper
+    name_array[3] = name_array.at(3) & ~0x20;
+
+    const QByteArray slot_name = "update" + name_array.mid(3) + "FromProperty";
+
+    if (!QMetaObject::invokeMethod(mapped.value(window->handle()),
+                                   slot_name.constData(),
+                                   Qt::DirectConnection)) {
+        qWarning() << "Failed to update property:" << slot_name;
+    }
 }
 
 void DPlatformWindowHelper::onFrameWindowContentMarginsHintChanged(const QMargins &oldMargins)
