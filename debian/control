@@ -1,5 +1,5 @@
 Source: deepin-qt5dxcb-plugin
-Section: devel
+Section: libs
 Priority: optional
 Maintainer: Debian Deepin Packaging Team <pkg-deepin-devel@lists.alioth.debian.org>
 Uploaders:
@@ -36,7 +36,6 @@ Vcs-Browser: https://anonscm.debian.org/git/pkg-deepin/deepin-qt5dxcb-plugin.git
 
 Package: qt5dxcb-plugin
 Architecture: any
-Section: libs
 Provides:
  libqt5dxcb-plugin,
 Conflicts:
