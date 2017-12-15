@@ -86,10 +86,10 @@ protected:
 private:
     QPaintDevice *redirected(QPoint *) const Q_DECL_OVERRIDE;
 
-    void setContentPath(const QPainterPath &path, bool isRoundedRect,
-                        int radius = 0, bool noRepaint = false);
+    void setContentPath(const QPainterPath &path, bool isRoundedRect, int radius = 0);
 
     void updateShadow();
+    void updateShadowAsync(int delaye = 30);
     void updateContentMarginsHint();
     void updateMask();
     void updateFrameMask();
@@ -98,6 +98,8 @@ private:
     void cancelAdsorbCursor();
     void adsorbCursor(Utility::CornerEdge cornerEdge);
     void startCursorAnimation();
+
+    bool disableFrame() const;
 
     static QList<DFrameWindow*> frameWindowList;
 
@@ -131,6 +133,8 @@ private:
     QVariantAnimation m_cursorAnimation;
 
     QPointer<QWindow> m_contentWindow;
+
+    QTimer m_updateShadowTimer;
 
     friend class DPlatformWindowHelper;
     friend class DPlatformBackingStoreHelper;

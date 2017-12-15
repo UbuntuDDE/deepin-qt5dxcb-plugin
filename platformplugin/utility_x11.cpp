@@ -296,7 +296,9 @@ void Utility::sendMoveResizeMessage(quint32 WId, uint32_t action, QPoint globalP
     xev.data.data32[3] = xbtn;
     xev.data.data32[4] = 0;
 
-    xcb_ungrab_pointer(QX11Info::connection(), QX11Info::appTime());
+    if (action != _NET_WM_MOVERESIZE_CANCEL)
+        xcb_ungrab_pointer(QX11Info::connection(), QX11Info::appTime());
+
     xcb_send_event(QX11Info::connection(), false, QX11Info::appRootWindow(QX11Info::appScreen()),
                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
                    (const char *)&xev);
@@ -578,6 +580,7 @@ Utility::QtMotifWmHints Utility::getMotifWmHints(quint32 WId)
 void Utility::setMotifWmHints(quint32 WId, const Utility::QtMotifWmHints &hints)
 {
     if (hints.flags != 0l) {
+#ifdef Q_XCB_CALL2
         Q_XCB_CALL2(xcb_change_property(DPlatformIntegration::xcbConnection()->xcb_connection(),
                                         XCB_PROP_MODE_REPLACE,
                                         WId,
@@ -586,10 +589,25 @@ void Utility::setMotifWmHints(quint32 WId, const Utility::QtMotifWmHints &hints)
                                         32,
                                         5,
                                         &hints), c);
+#else
+        xcb_change_property(DPlatformIntegration::xcbConnection()->xcb_connection(),
+                            XCB_PROP_MODE_REPLACE,
+                            WId,
+                            DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_MOTIF_WM_HINTS),
+                            DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_MOTIF_WM_HINTS),
+                            32,
+                            5,
+                            &hints);
+#endif
     } else {
+#ifdef Q_XCB_CALL2
         Q_XCB_CALL2(xcb_delete_property(DPlatformIntegration::xcbConnection()->xcb_connection(), WId,
                                         DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_MOTIF_WM_HINTS)),
                                         DPlatformIntegration::xcbConnection()->xcb_connection());
+#else
+        xcb_delete_property(DPlatformIntegration::xcbConnection()->xcb_connection(), WId,
+                            DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_MOTIF_WM_HINTS));
+#endif
     }
 }
 
