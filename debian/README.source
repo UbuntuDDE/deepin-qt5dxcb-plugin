@@ -1,6 +1,8 @@
 Source for deepin-qt5dxcb-plugin
 --------------------------------
 
+Source code taken from upstream git commit f8013823.
+
 Bundled Qt private headers are removed in favor of headers
 provided by the system.
 

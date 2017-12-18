@@ -5,6 +5,7 @@ Files-Excluded: platformplugin/libqt5xcbqpa-dev/*
 
 Files: *
 Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
+           2017 zccrs <ccrr1314@live.com>
 License: GPL-3+
 
 Files: debian/*
