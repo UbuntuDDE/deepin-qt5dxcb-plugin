@@ -287,7 +287,10 @@ static bool focusInPeeker(QXcbConnection *connection, xcb_generic_event_t *event
 
 void WindowEventHook::handleFocusOutEvent(const xcb_focus_out_event_t *event)
 {
-    Q_UNUSED(event)
+    // Ignore focus events
+    if (event->mode == XCB_NOTIFY_MODE_GRAB) {
+        return;
+    }
 
     // Ignore focus events that are being sent only because the pointer is over
     // our window, even if the input focus is in a different window.
