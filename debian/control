@@ -34,8 +34,8 @@ Build-Depends:
  qtbase5-private-dev,
 Standards-Version: 4.1.3
 Homepage: https://github.com/linuxdeepin/qt5dxcb-plugin
-Vcs-Git: https://anonscm.debian.org/git/pkg-deepin/deepin-qt5dxcb-plugin.git
-Vcs-Browser: https://anonscm.debian.org/git/pkg-deepin/deepin-qt5dxcb-plugin.git
+Vcs-Git: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin.git
+Vcs-Browser: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin.git
 
 Package: qt5dxcb-plugin
 Architecture: any
