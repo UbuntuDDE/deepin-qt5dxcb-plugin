@@ -19,6 +19,7 @@
 #include "vtablehook.h"
 #include "utility.h"
 #include "dframewindow.h"
+#include "dplatformwindowhelper.h"
 
 #define private public
 #define protected public
@@ -39,18 +40,29 @@ DPP_BEGIN_NAMESPACE
 
 PUBLIC_CLASS(QXcbWindow, WindowEventHook);
 
-WindowEventHook::WindowEventHook(QXcbWindow *window)
+WindowEventHook::WindowEventHook(QXcbWindow *window, bool useDxcb)
 {
-    VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleClientMessageEvent,
-                                 this, &WindowEventHook::handleClientMessageEvent);
-    VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleFocusInEvent,
-                                 this, &WindowEventHook::handleFocusInEvent);
-    VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleFocusOutEvent,
-                                 this, &WindowEventHook::handleFocusOutEvent);
+    const Qt::WindowType &type = window->window()->type();
+
+    if (useDxcb) {
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleConfigureNotifyEvent,
+                                     this, &WindowEventHook::handleConfigureNotifyEvent);
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleMapNotifyEvent,
+                                     this, &WindowEventHook::handleMapNotifyEvent);
+    }
+
+    if (type == Qt::Widget || type == Qt::Window || type == Qt::Dialog) {
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleClientMessageEvent,
+                                     this, &WindowEventHook::handleClientMessageEvent);
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleFocusInEvent,
+                                     this, &WindowEventHook::handleFocusInEvent);
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleFocusOutEvent,
+                                     this, &WindowEventHook::handleFocusOutEvent);
 #ifdef XCB_USE_XINPUT22
-    VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleXIEnterLeave,
-                                 this, &WindowEventHook::handleXIEnterLeave);
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleXIEnterLeave,
+                                     this, &WindowEventHook::handleXIEnterLeave);
 #endif
+    }
 
     QObject::connect(window->window(), &QWindow::destroyed, window->window(), [this, window] {
         delete this;
@@ -90,6 +102,28 @@ xcb_atom_t toXdndAction(const QXcbDrag *drag, Qt::DropAction a)
         return XCB_NONE;
     default:
         return drag->atom(QXcbAtom::XdndActionCopy);
+    }
+}
+
+void WindowEventHook::handleConfigureNotifyEvent(const xcb_configure_notify_event_t *event)
+{
+    QXcbWindow *me = window();
+
+    me->QXcbWindow::handleConfigureNotifyEvent(event);
+
+    if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
+        helper->m_frameWindow->updateNativeWindowXPixmap(event->width, event->height);
+    }
+}
+
+void WindowEventHook::handleMapNotifyEvent(const xcb_map_notify_event_t *event)
+{
+    QXcbWindow *me = window();
+
+    me->QXcbWindow::handleMapNotifyEvent(event);
+
+    if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
+        helper->m_frameWindow->updateNativeWindowXPixmap();
     }
 }
 

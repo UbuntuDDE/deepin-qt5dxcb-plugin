@@ -123,15 +123,15 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
     if (isUseDxcb) {
         QSurfaceFormat format = window->format();
 
-        const int oldAlpha = format.alphaBufferSize();
-        const int newAlpha = 8;
+//        const int oldAlpha = format.alphaBufferSize();
+//        const int newAlpha = 8;
 
         window->setProperty("_d_dxcb_TransparentBackground", format.hasAlpha());
 
-        if (oldAlpha != newAlpha) {
-            format.setAlphaBufferSize(newAlpha);
-            window->setFormat(format);
-        }
+//        if (oldAlpha != newAlpha) {
+//            format.setAlphaBufferSize(newAlpha);
+//            window->setFormat(format);
+//        }
     }
 
     QPlatformWindow *w = DPlatformIntegrationParent::createPlatformWindow(window);
@@ -146,11 +146,7 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
     }
 
 #ifdef Q_OS_LINUX
-    if (window->type() == Qt::Widget
-            || window->type() == Qt::Window
-            || window->type() == Qt::Dialog) {
-        Q_UNUSED(new WindowEventHook(xw))
-    }
+    Q_UNUSED(new WindowEventHook(xw, isUseDxcb))
 #endif
 
 //    QWindow *tp_for_window = window->transientParent();
@@ -171,9 +167,9 @@ QPlatformBackingStore *DPlatformIntegration::createPlatformBackingStore(QWindow 
 
     QPlatformBackingStore *store = DPlatformIntegrationParent::createPlatformBackingStore(window);
 
-    if (window->type() != Qt::Desktop && window->property(useDxcb).toBool())
+//    if (window->type() != Qt::Desktop && window->property(useDxcb).toBool())
 #ifdef USE_NEW_IMPLEMENTING
-        m_storeHelper->addBackingStore(store);
+//        m_storeHelper->addBackingStore(store);
 #else
         return new DPlatformBackingStore(window, static_cast<QXcbBackingStore*>(store));
 #endif
@@ -185,7 +181,7 @@ QPlatformOpenGLContext *DPlatformIntegration::createPlatformOpenGLContext(QOpenG
 {
     QPlatformOpenGLContext *p_context = DPlatformIntegrationParent::createPlatformOpenGLContext(context);
 
-    m_contextHelper->addOpenGLContext(context, p_context);
+//    m_contextHelper->addOpenGLContext(context, p_context);
 
     return p_context;
 }
@@ -586,6 +582,29 @@ static bool hookDragObjectEventFilter(QObject *drag, QObject *o, QEvent *e)
     return VtableHook::callOriginalFun(drag, &QObject::eventFilter, o, e);
 }
 
+#ifdef Q_OS_LINUX
+typedef QXcbScreen QNativeScreen;
+#elif defined(Q_OS_WIN)
+typedef QWindowsScreen QNativeScreen;
+#endif
+
+QWindow *overrideTopLevelAt(QPlatformScreen *s, const QPoint &point)
+{
+    QWindow *window = static_cast<QNativeScreen*>(s)->QNativeScreen::topLevelAt(point);
+
+    if (DFrameWindow *fw = qobject_cast<DFrameWindow*>(window)) {
+        return fw->contentWindow();
+    }
+
+    return window;
+}
+
+static void hookScreenGetWindow(QScreen *screen)
+{
+    if (screen && screen->handle())
+        VtableHook::overrideVfptrFun(screen->handle(), &QPlatformScreen::topLevelAt, &overrideTopLevelAt);
+}
+
 void DPlatformIntegration::initialize()
 {
     // 由于Qt很多代码中写死了是xcb，所以只能伪装成是xcb
@@ -604,42 +623,51 @@ void DPlatformIntegration::initialize()
 
     if (!qEnvironmentVariableIsSet("DXCB_DISABLE_HOOK_CURSOR")) {
 #if defined(XCB_USE_XLIB) && !defined(QT_NO_LIBRARY)
-    static bool function_ptrs_not_initialized = true;
-    if (function_ptrs_not_initialized) {
-        QLibrary xcursorLib(QLatin1String("Xcursor"), 1);
-        bool xcursorFound = xcursorLib.load();
-        if (!xcursorFound) { // try without the version number
-            xcursorLib.setFileName(QLatin1String("Xcursor"));
-            xcursorFound = xcursorLib.load();
+        static bool function_ptrs_not_initialized = true;
+        if (function_ptrs_not_initialized) {
+            QLibrary xcursorLib(QLatin1String("Xcursor"), 1);
+            bool xcursorFound = xcursorLib.load();
+            if (!xcursorFound) { // try without the version number
+                xcursorLib.setFileName(QLatin1String("Xcursor"));
+                xcursorFound = xcursorLib.load();
+            }
+            if (xcursorFound) {
+                ptrXcursorLibraryLoadCursor =
+                        (PtrXcursorLibraryLoadCursor) xcursorLib.resolve("XcursorLibraryLoadCursor");
+                ptrXcursorLibraryGetTheme =
+                        (PtrXcursorLibraryGetTheme) xcursorLib.resolve("XcursorGetTheme");
+                ptrXcursorLibrarySetTheme =
+                        (PtrXcursorLibrarySetTheme) xcursorLib.resolve("XcursorSetTheme");
+                ptrXcursorLibraryGetDefaultSize =
+                        (PtrXcursorLibraryGetDefaultSize) xcursorLib.resolve("XcursorGetDefaultSize");
+            }
+            function_ptrs_not_initialized = false;
         }
-        if (xcursorFound) {
-            ptrXcursorLibraryLoadCursor =
-                (PtrXcursorLibraryLoadCursor) xcursorLib.resolve("XcursorLibraryLoadCursor");
-            ptrXcursorLibraryGetTheme =
-                    (PtrXcursorLibraryGetTheme) xcursorLib.resolve("XcursorGetTheme");
-            ptrXcursorLibrarySetTheme =
-                    (PtrXcursorLibrarySetTheme) xcursorLib.resolve("XcursorSetTheme");
-            ptrXcursorLibraryGetDefaultSize =
-                    (PtrXcursorLibraryGetDefaultSize) xcursorLib.resolve("XcursorGetDefaultSize");
-        }
-        function_ptrs_not_initialized = false;
-    }
-
 #endif
 
-    for (QScreen *s : qApp->screens()) {
-        hookXcbCursor(s);
-    }
+        for (QScreen *s : qApp->screens()) {
+            hookXcbCursor(s);
+        }
 
-    QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &hookXcbCursor);
-#endif
+        QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &hookXcbCursor);
     }
+#endif
 
     VtableHook::overrideVfptrFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked,
                                  this, &DPlatformIntegration::isWindowBlockedHandle);
 
     // FIXME(zccrs): 修复启动drag后鼠标从一块屏幕移动到另一块后图标窗口位置不对
     VtableHook::overrideVfptrFun(static_cast<QBasicDrag*>(drag()), &QObject::eventFilter, &hookDragObjectEventFilter);
+
+    for (QScreen *s : qApp->screens()) {
+        hookScreenGetWindow(s);
+    }
+
+    QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &hookScreenGetWindow);
+    QObject::connect(qApp, &QGuiApplication::screenRemoved, qApp, [] (QScreen *screen) {
+        if (screen->handle())
+            VtableHook::clearGhostVtable(screen->handle());
+    });
 }
 
 bool DPlatformIntegration::isWindowBlockedHandle(QWindow *window, QWindow **blockingWindow)

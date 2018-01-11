@@ -102,7 +102,7 @@ public:
 
 private:
     bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
-    void setNativeWindowGeometry(const QRect &rect);
+    void setNativeWindowGeometry(const QRect &rect, bool onlyResize = false);
 
     void updateClipPathByWindowRadius(const QSize &windowSize);
     void setClipPath(const QPainterPath &path);
@@ -110,12 +110,16 @@ private:
     bool updateWindowBlurAreasForWM();
     void updateSizeHints();
     void updateContentPathForFrameWindow();
+    void updateContentWindowGeometry();
+#ifdef Q_OS_LINUX
+    void updateContentWindowNormalHints();
+#endif
 
     int getWindowRadius() const;
     int getShadowRadius() const;
     QColor getBorderColor() const;
 
-    // update propertys
+    // update properties
     Q_SLOT void updateClipPathFromProperty();
     Q_SLOT void updateFrameMaskFromProperty();
     Q_SLOT void updateWindowRadiusFromProperty();
@@ -140,12 +144,10 @@ private:
 
     QNativeWindow *m_nativeWindow;
     DFrameWindow *m_frameWindow;
-    QSize m_frameWindowSize;
 
     QRect m_windowVaildGeometry;
-    bool overrideSetGeometry = true;
 
-    // propertys
+    // properties
     bool m_isUserSetClipPath = false;
     QPainterPath m_clipPath;
 
@@ -170,10 +172,16 @@ private:
     QVector<Utility::BlurArea> m_blurAreaList;
     QList<QPainterPath> m_blurPathList;
 
+#ifdef Q_OS_LINUX
+    uint32_t damage_id = 0;
+#endif
+
     friend class DPlatformBackingStoreHelper;
     friend class DPlatformOpenGLContextHelper;
     friend class DPlatformIntegration;
     friend class DPlatformNativeInterfaceHook;
+    friend class XcbNativeEventFilter;
+    friend class WindowEventHook;
     friend QWindow *topvelWindow(QWindow *);
 };
 
