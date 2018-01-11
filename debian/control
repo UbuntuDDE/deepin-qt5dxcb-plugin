@@ -6,6 +6,7 @@ Uploaders:
  Boyuan Yang <073plan@gmail.com>,
 Build-Depends:
  debhelper (>= 11~),
+ libcairo2-dev,
  libdbus-1-dev,
  libdtkcore-dev (>= 2.0.5.2-2~),
  libegl1-mesa-dev,
@@ -17,6 +18,8 @@ Build-Depends:
  libqt5x11extras5-dev,
  libsm-dev,
  libudev-dev,
+ libxcb-composite0-dev,
+ libxcb-damage0-dev,
  libxcb-icccm4-dev,
  libxcb-image0-dev,
  libxcb-keysyms1-dev,
