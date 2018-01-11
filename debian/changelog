@@ -1,5 +1,5 @@
-deepin-qt5dxcb-plugin (1.1.5+ds+git20171222-1) unstable; urgency=medium
+deepin-qt5dxcb-plugin (1.1.6+ds+git20180111-1) unstable; urgency=medium
 
   * Initial release. (Closes: #884274)
 
- -- Boyuan Yang <073plan@gmail.com>  Mon, 25 Dec 2017 19:55:36 +0800
+ -- Boyuan Yang <073plan@gmail.com>  Thu, 11 Jan 2018 20:41:02 +0800

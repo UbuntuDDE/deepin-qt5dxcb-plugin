@@ -4,13 +4,17 @@ Source: https://github.com/linuxdeepin/qt5dxcb-plugin
 Files-Excluded: platformplugin/libqt5xcbqpa-dev/*
 
 Files: *
-Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
-           2017 zccrs <ccrr1314@live.com>
+Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>
+           2017-2018 zccrs <ccrr1314@live.com>
+License: GPL-3+
+
+Files: platformplugin/cursors/*
+Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>
 License: GPL-3+
 
 Files: debian/*
 Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
-           2017 Boyuan Yang <073plan@gmail.com>
+           2018 Boyuan Yang <073plan@gmail.com>
 License: GPL-3+
 
 License: GPL-3+
