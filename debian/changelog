@@ -1,3 +1,10 @@
+deepin-qt5dxcb-plugin (1.1.6+ds+git20180125-1) unstable; urgency=medium
+
+  * New upstream snapsnot.
+  * Reuild to get rid of previous binary-included upload.
+
+ -- Boyuan Yang <073plan@gmail.com>  Sat, 27 Jan 2018 11:05:42 +0800
+
 deepin-qt5dxcb-plugin (1.1.6+ds+git20180111-1) unstable; urgency=medium
 
   * Initial release. (Closes: #884274)
