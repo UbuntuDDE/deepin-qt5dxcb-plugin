@@ -532,14 +532,6 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
             return true;
         case QEvent::Resize: {
             updateContentWindowGeometry();
-
-            const QMargins &frame_margin = m_frameWindow->contentMarginsHint();
-            QSize size_dif(frame_margin.left() + frame_margin.right(),
-                           frame_margin.top() + frame_margin.bottom());
-
-            QResizeEvent *ev = static_cast<QResizeEvent*>(event);
-            QResizeEvent re(ev->size() - size_dif, ev->oldSize() - size_dif);
-            qApp->sendEvent(m_nativeWindow->window(), &re);
             break;
         }
         case QEvent::MouseButtonPress:
@@ -653,7 +645,7 @@ void DPlatformWindowHelper::setNativeWindowGeometry(const QRect &rect, bool only
     m_nativeWindow->QNativeWindow::setGeometry(rect);
     qt_window_private(m_nativeWindow->window())->parentWindow = 0;
     qt_window_private(m_nativeWindow->window())->positionAutomatic = false;
-    updateContentWindowNormalHints();
+    updateWindowNormalHints();
 }
 
 void DPlatformWindowHelper::updateClipPathByWindowRadius(const QSize &windowSize)
@@ -840,7 +832,7 @@ void DPlatformWindowHelper::updateSizeHints()
     qt_window_private(m_frameWindow)->sizeIncrement = m_nativeWindow->window()->sizeIncrement();
 
     m_frameWindow->handle()->propagateSizeHints();
-    updateContentWindowNormalHints();
+    updateWindowNormalHints();
 }
 
 void DPlatformWindowHelper::updateContentPathForFrameWindow()
@@ -866,7 +858,7 @@ void DPlatformWindowHelper::updateContentWindowGeometry()
 }
 
 #ifdef Q_OS_LINUX
-void DPlatformWindowHelper::updateContentWindowNormalHints()
+void DPlatformWindowHelper::updateWindowNormalHints()
 {
     // update WM_NORMAL_HINTS
     xcb_size_hints_t hints;
@@ -875,6 +867,15 @@ void DPlatformWindowHelper::updateContentWindowNormalHints()
     xcb_icccm_size_hints_set_resize_inc(&hints, 1, 1);
     xcb_icccm_set_wm_normal_hints(m_nativeWindow->xcb_connection(),
                                   m_nativeWindow->xcb_window(), &hints);
+
+    QSize size_inc = m_frameWindow->sizeIncrement();
+
+    if (size_inc.isEmpty())
+        size_inc = QSize(1, 1);
+
+    xcb_icccm_size_hints_set_resize_inc(&hints, size_inc.width(), size_inc.height());
+    xcb_icccm_set_wm_normal_hints(m_nativeWindow->xcb_connection(),
+                                  m_frameWindow->winId(), &hints);
 }
 #endif
 

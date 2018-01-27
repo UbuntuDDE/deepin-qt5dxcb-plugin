@@ -51,6 +51,11 @@ WindowEventHook::WindowEventHook(QXcbWindow *window, bool useDxcb)
                                      this, &WindowEventHook::handleMapNotifyEvent);
     }
 
+    if (qobject_cast<DFrameWindow*>(window->window())) {
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleMapNotifyEvent,
+                                     this, &WindowEventHook::handleMapNotifyEvent);
+    }
+
     if (type == Qt::Widget || type == Qt::Window || type == Qt::Dialog) {
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleClientMessageEvent,
                                      this, &WindowEventHook::handleClientMessageEvent);
@@ -122,7 +127,9 @@ void WindowEventHook::handleMapNotifyEvent(const xcb_map_notify_event_t *event)
 
     me->QXcbWindow::handleMapNotifyEvent(event);
 
-    if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
+    if (DFrameWindow *frame = qobject_cast<DFrameWindow*>(me->window())) {
+        frame->updateNativeWindowXPixmap();
+    } else if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
         helper->m_frameWindow->updateNativeWindowXPixmap();
     }
 }
