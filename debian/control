@@ -48,6 +48,7 @@ Breaks:
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
+Multi-Arch: same
 Description: Qt platform theme integration plugin for DDE
  Deepin's qt5dxcb-plugin is the Qt platform integration plugin for Deepin
  Desktop Environment. It provides an abstract interface between Deepin
