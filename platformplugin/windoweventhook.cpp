@@ -40,18 +40,13 @@ DPP_BEGIN_NAMESPACE
 
 PUBLIC_CLASS(QXcbWindow, WindowEventHook);
 
-WindowEventHook::WindowEventHook(QXcbWindow *window, bool useDxcb)
+WindowEventHook::WindowEventHook(QXcbWindow *window, bool redirectContent)
 {
     const Qt::WindowType &type = window->window()->type();
 
-    if (useDxcb) {
+    if (redirectContent) {
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleConfigureNotifyEvent,
                                      this, &WindowEventHook::handleConfigureNotifyEvent);
-        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleMapNotifyEvent,
-                                     this, &WindowEventHook::handleMapNotifyEvent);
-    }
-
-    if (qobject_cast<DFrameWindow*>(window->window())) {
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleMapNotifyEvent,
                                      this, &WindowEventHook::handleMapNotifyEvent);
     }
@@ -68,11 +63,6 @@ WindowEventHook::WindowEventHook(QXcbWindow *window, bool useDxcb)
                                      this, &WindowEventHook::handleXIEnterLeave);
 #endif
     }
-
-    QObject::connect(window->window(), &QWindow::destroyed, window->window(), [this, window] {
-        delete this;
-        VtableHook::clearGhostVtable(static_cast<QXcbWindowEventListener*>(window));
-    });
 }
 
 //#define DND_DEBUG
@@ -117,7 +107,7 @@ void WindowEventHook::handleConfigureNotifyEvent(const xcb_configure_notify_even
     me->QXcbWindow::handleConfigureNotifyEvent(event);
 
     if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
-        helper->m_frameWindow->updateNativeWindowXPixmap(event->width, event->height);
+        helper->m_frameWindow->markXPixmapToDirty(event->width, event->height);
     }
 }
 
@@ -128,9 +118,9 @@ void WindowEventHook::handleMapNotifyEvent(const xcb_map_notify_event_t *event)
     me->QXcbWindow::handleMapNotifyEvent(event);
 
     if (DFrameWindow *frame = qobject_cast<DFrameWindow*>(me->window())) {
-        frame->updateNativeWindowXPixmap();
+        frame->markXPixmapToDirty();
     } else if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
-        helper->m_frameWindow->updateNativeWindowXPixmap();
+        helper->m_frameWindow->markXPixmapToDirty();
     }
 }
 
