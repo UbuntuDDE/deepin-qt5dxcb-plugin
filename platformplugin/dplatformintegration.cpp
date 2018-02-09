@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,8 +174,13 @@ QPlatformBackingStore *DPlatformIntegration::createPlatformBackingStore(QWindow 
 
     if (window->type() != Qt::Desktop && window->property(useDxcb).toBool())
 #ifdef USE_NEW_IMPLEMENTING
-        if (!DPlatformWindowHelper::windowRedirectContent(window))
+        if (!DPlatformWindowHelper::windowRedirectContent(window)) {
             m_storeHelper->addBackingStore(store);
+
+            if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(window->handle())) {
+                helper->m_frameWindow->m_contentBackingStore = store;
+            }
+        }
 #else
         return new DPlatformBackingStore(window, static_cast<QXcbBackingStore*>(store));
 #endif

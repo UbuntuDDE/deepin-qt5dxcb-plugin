@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,6 +137,9 @@ DFrameWindow::DFrameWindow(QWindow *content)
     m_startAnimationTimer.setSingleShot(true);
     m_startAnimationTimer.setInterval(300);
 
+    m_updateShadowTimer.setInterval(100);
+    m_updateShadowTimer.setSingleShot(true);
+
     connect(&m_startAnimationTimer, &QTimer::timeout,
             this, &DFrameWindow::startCursorAnimation);
 
@@ -267,6 +270,10 @@ void DFrameWindow::setContentRoundedRect(const QRect &rect, int radius)
     m_contentGeometry = rect.translated(contentOffsetHint());
 
     setContentPath(path, true, radius);
+
+    // force update shadow
+    // m_contentGeometry may changed, but clipPath is not change.
+    updateShadowAsync(0);
 }
 
 QMargins DFrameWindow::contentMarginsHint() const
@@ -384,7 +391,7 @@ void DFrameWindow::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    setCursor(Qt::ArrowCursor);
+    unsetCursor();
 
     if (!canResize())
         return;
@@ -525,6 +532,14 @@ void DFrameWindow::timerEvent(QTimerEvent *event)
             platformBackingStore->flush(this, d->flushArea, QPoint(0, 0));
             d->flushArea = QRegion();
         }
+    } else if (event->timerId() == m_paintShadowOnContentTimerId) {
+        killTimer(m_paintShadowOnContentTimerId);
+        m_paintShadowOnContentTimerId = -1;
+
+        QRect rect = m_contentWindow->handle()->geometry();
+
+        rect.setTopLeft(QPoint(0, 0));
+        m_contentBackingStore->flush(m_contentWindow, rect, QPoint(0, 0));
     } else {
         return QPaintDeviceWindow::timerEvent(event);
     }
@@ -599,14 +614,18 @@ void DFrameWindow::drawShadowTo(QPaintDevice *device)
     qreal device_pixel_ratio = devicePixelRatio();
     const QSize &size = handle()->geometry().size();
     QPainter pa(device);
-    QPainterPath clip_path;
 
-    clip_path.addRect(QRect(QPoint(0, 0), size));
-    clip_path -= m_clipPath;
+    if (m_redirectContent) {
+        QPainterPath clip_path;
 
-    pa.setRenderHint(QPainter::Antialiasing);
+        clip_path.addRect(QRect(QPoint(0, 0), size));
+        clip_path -= m_clipPath;
+
+        pa.setClipPath(clip_path);
+        pa.setRenderHint(QPainter::Antialiasing);
+    }
+
     pa.setCompositionMode(QPainter::CompositionMode_Source);
-    pa.setClipPath(clip_path);
 
     if (!disableFrame() && Q_LIKELY(DXcbWMSupport::instance()->hasComposite())
             && !m_shadowImage.isNull()) {
@@ -804,7 +823,7 @@ void DFrameWindow::markXPixmapToDirty(int width, int height)
 
 void DFrameWindow::updateShadow()
 {
-    if (!m_canUpdateShadow || m_contentGeometry.isEmpty() || !isVisible() || disableFrame())
+    if (!m_canUpdateShadow || m_contentGeometry.isEmpty() || disableFrame())
         return;
 
     qreal device_pixel_ratio = devicePixelRatio();
@@ -822,14 +841,18 @@ void DFrameWindow::updateShadow()
 
     m_shadowImage = Utility::dropShadow(pixmap, m_shadowRadius * device_pixel_ratio, m_shadowColor);
     update();
+
+    // 阴影更新后尝试刷新内部窗口
+    if (m_contentBackingStore)
+        m_paintShadowOnContentTimerId = startTimer(300, Qt::PreciseTimer);
 }
 
 void DFrameWindow::updateShadowAsync(int delaye)
 {
-    if (m_updateShadowTimer.isActive())
+    if (m_updateShadowTimer.isActive()) {
         return;
+    }
 
-    m_updateShadowTimer.setSingleShot(true);
     m_updateShadowTimer.start(delaye);
 }
 
@@ -890,7 +913,7 @@ void DFrameWindow::updateMask()
     if (DWMSupport::instance()->hasComposite())
         mouse_margins = canResize() ? MOUSE_MARGINS : 0;
     else
-        mouse_margins = m_borderWidth;
+        mouse_margins = qRound(m_borderWidth * devicePixelRatio());
 
     const QPainterPath &path = m_clipPath;
 

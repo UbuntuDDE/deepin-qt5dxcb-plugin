@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,11 @@ void DPlatformWindowHelper::setGeometry(const QRect &rect)
 
     qt_window_private(helper->m_frameWindow)->positionAutomatic = qt_window_private(helper->m_nativeWindow->window())->positionAutomatic;
     helper->m_frameWindow->handle()->setGeometry(rect + content_margins);
-    helper->setNativeWindowGeometry(rect, true);
+
+    // 未开启重定向时, 可能会导致内容窗口位置不正确
+    if (helper->m_frameWindow->m_redirectContent)
+        helper->setNativeWindowGeometry(rect, true);
+
     helper->m_nativeWindow->QPlatformWindow::setGeometry(rect);
 }
 
@@ -310,6 +314,14 @@ void DPlatformWindowHelper::setVisible(bool visible)
         // Fix the window can't show minimized if window is fixed size
         Utility::setMotifWmHints(window->m_window, mwmhints);
         Utility::setMotifWmHints(helper->m_nativeWindow->QNativeWindow::winId(), cw_hints);
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+        // 当Qt版本在5.9及以上时, 如果窗口设置了BypassWindowManagerHint标志, 窗口就无法通过鼠标点击获得焦点
+        if (helper->m_nativeWindow->window()->flags().testFlag(Qt::BypassWindowManagerHint)
+                && QGuiApplication::modalWindow() == helper->m_nativeWindow->window()) {
+            helper->m_nativeWindow->requestActivateWindow();
+        }
 #endif
 
         return;
@@ -555,9 +567,14 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
         case QEvent::MouseButtonRelease:
         case QEvent::MouseMove: {
             DQMouseEvent *e = static_cast<DQMouseEvent*>(event);
+            const QRectF rectF(m_windowVaildGeometry);
+            const QPointF posF(e->localPos() - m_frameWindow->contentOffsetHint());
 
-            if (QRectF(m_windowVaildGeometry).contains(e->localPos() - m_frameWindow->contentOffsetHint())) {
-                m_frameWindow->setCursor(Qt::ArrowCursor);
+            // QRectF::contains中判断时加入了右下边界
+            if (!qFuzzyCompare(posF.x(), rectF.width())
+                    && !qFuzzyCompare(posF.y(), rectF.height())
+                    && rectF.contains(posF)) {
+                m_frameWindow->unsetCursor();
                 e->l = e->w = m_nativeWindow->window()->mapFromGlobal(e->globalPos());
                 qApp->sendEvent(m_nativeWindow->window(), e);
 
@@ -695,11 +712,11 @@ void DPlatformWindowHelper::setClipPath(const QPainterPath &path)
     QPainterPathStroker stroker;
 
     stroker.setJoinStyle(Qt::MiterJoin);
-    stroker.setWidth(1);
+    stroker.setWidth(2 * m_nativeWindow->window()->devicePixelRatio());
 
     Utility::setShapePath(m_nativeWindow->QNativeWindow::winId(),
                           stroker.createStroke(real_path).united(real_path),
-                          true);
+                          m_frameWindow->m_redirectContent);
 
     updateWindowBlurAreasForWM();
     updateContentPathForFrameWindow();
@@ -712,7 +729,9 @@ void DPlatformWindowHelper::setWindowVaildGeometry(const QRect &geometry)
 
     m_windowVaildGeometry = geometry;
 
-    updateWindowBlurAreasForWM();
+    // The native window geometry may not update now, need to waiting for reisze
+    // event is procceed.
+    QTimer::singleShot(1, this, &DPlatformWindowHelper::updateWindowBlurAreasForWM);
 }
 
 bool DPlatformWindowHelper::updateWindowBlurAreasForWM()
@@ -890,6 +909,19 @@ void DPlatformWindowHelper::updateWindowNormalHints()
     if (size_inc.isEmpty())
         size_inc = QSize(1, 1);
 
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(m_nativeWindow->xcb_connection(), m_frameWindow->winId());
+
+    if (xcb_get_property_reply_t *reply = xcb_get_property_reply(m_nativeWindow->xcb_connection(), cookie, 0)) {
+        xcb_icccm_get_wm_size_hints_from_reply(&hints, reply);
+        free(reply);
+
+        if (hints.width_inc == 1 && hints.height_inc == 1) {
+            return;
+        }
+    } else {
+        return;
+    }
+
     xcb_icccm_size_hints_set_resize_inc(&hints, size_inc.width(), size_inc.height());
     xcb_icccm_set_wm_normal_hints(m_nativeWindow->xcb_connection(),
                                   m_frameWindow->winId(), &hints);
@@ -898,7 +930,8 @@ void DPlatformWindowHelper::updateWindowNormalHints()
 
 int DPlatformWindowHelper::getWindowRadius() const
 {
-    if (m_frameWindow->windowState() == Qt::WindowFullScreen)
+    if (m_frameWindow->windowState() == Qt::WindowFullScreen
+            || m_frameWindow->windowState() == Qt::WindowMaximized)
         return 0;
 
     return (m_isUserSetWindowRadius || DWMSupport::instance()->hasComposite()) ? m_windowRadius : 0;

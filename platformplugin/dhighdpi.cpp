@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
+ * Author:     zccrs <zccrs@live.com>
+ *
+ * Maintainer: zccrs <zhangjide@deepin.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -14,36 +18,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "dhighdpi.h"
 
-#ifndef XCBNATIVEEVENTFILTER_H
-#define XCBNATIVEEVENTFILTER_H
+#include <private/qhighdpiscaling_p.h>
 
-#include "global.h"
-
-#include <QAbstractNativeEventFilter>
-#include <QClipboard>
-
-#include <xcb/xproto.h>
-
-QT_BEGIN_NAMESPACE
-class QXcbConnection;
-QT_END_NAMESPACE
-
-DPP_BEGIN_NAMESPACE
-
-class XcbNativeEventFilter : public QAbstractNativeEventFilter
+QPointF DHighDpi::fromNativePixels(const QPointF &pixelPoint, const QWindow *window)
 {
-public:
-    XcbNativeEventFilter(QXcbConnection *connection);
-
-    QClipboard::Mode clipboardModeForAtom(xcb_atom_t a) const;
-    bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) Q_DECL_OVERRIDE;
-
-private:
-    QXcbConnection *m_connection;
-    uint8_t m_damageFirstEvent;
-};
-
-DPP_END_NAMESPACE
-
-#endif // XCBNATIVEEVENTFILTER_H
+    return QHighDpi::fromNativePixels(pixelPoint, window);
+}

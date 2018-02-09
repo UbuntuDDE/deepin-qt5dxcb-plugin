@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ void DPlatformOpenGLContextHelper::swapBuffers(QPlatformSurface *surface)
         if (!window_helper)
             goto end;
 
-        if (!window_helper->m_isUserSetClipPath && window_helper->m_windowRadius <= 0)
+        if (!window_helper->m_isUserSetClipPath && window_helper->getWindowRadius() <= 0)
             goto end;
 
         qreal device_pixel_ratio = window_helper->m_nativeWindow->window()->devicePixelRatio();

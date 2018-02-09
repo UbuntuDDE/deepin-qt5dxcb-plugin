@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2016 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "utility.h"
 #include "dframewindow.h"
 #include "dplatformwindowhelper.h"
+#include "dhighdpi.h"
 
 #define private public
 #define protected public
@@ -407,16 +408,14 @@ void WindowEventHook::handleXIEnterLeave(xcb_ge_event_t *event)
 
                 if (buttons.testFlag(b)) {
                     if (!isSet) {
-                        QGuiApplicationPrivate::lastCursorPosition = QPointF(root_x, root_y);
+                        QGuiApplicationPrivate::lastCursorPosition = DHighDpi::fromNativePixels(QPointF(root_x, root_y), me->window());
                         me->handleButtonReleaseEvent(event_x, event_y, root_x, root_y,
-                                                     0, modifiers, ev->time,
-                                                     Qt::MouseEventSynthesizedBySystem);
+                                                     0, modifiers, ev->time);
                     }
                 } else if (isSet) {
-                    QGuiApplicationPrivate::lastCursorPosition = QPointF(root_x, root_y);
+                    QGuiApplicationPrivate::lastCursorPosition = DHighDpi::fromNativePixels(QPointF(root_x, root_y), me->window());
                     me->handleButtonPressEvent(event_x, event_y, root_x, root_y,
-                                               0, modifiers, ev->time,
-                                               Qt::MouseEventSynthesizedBySystem);
+                                               0, modifiers, ev->time);
                 }
             }
         }
