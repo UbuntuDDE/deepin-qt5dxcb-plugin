@@ -453,9 +453,6 @@ void DPlatformWindowHelper::requestActivateWindow()
 {
     DPlatformWindowHelper *helper = me();
 
-    if (helper->m_nativeWindow->window()->isActive())
-        return;
-
 #ifdef Q_OS_LINUX
     if (helper->m_frameWindow->handle()->isExposed() && !DXcbWMSupport::instance()->hasComposite()
             && helper->m_frameWindow->windowState() == Qt::WindowMinimized) {
@@ -658,13 +655,21 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
                 updateClipPathByWindowRadius(static_cast<QResizeEvent*>(event)->size());
             }
             break;
-        case QEvent::Leave: {
-            const QPoint &pos = Utility::translateCoordinates(QPoint(0, 0), m_nativeWindow->winId(),
-                                                              DPlatformIntegration::instance()->defaultConnection()->rootWindow());
-            const QPoint &cursor_pos = qApp->primaryScreen()->handle()->cursor()->pos();
+// ###(zccrs): 在9b1a28e6这个提交中因为调用了内部窗口的setVisible，所以需要过滤掉visible为false时产生的不必要的Leave事件
+//             这段代码会引起窗口被其它窗口覆盖时的Leave事件丢失
+//             因为已经移除了setVisible相关的代码，故先注释掉这部分代码，看是否有不良影响
+//        case QEvent::Leave: {
+//            QWindow::Visibility visibility = m_nativeWindow->window()->visibility();
 
-            return m_clipPath.contains(QPointF(cursor_pos - pos) / m_nativeWindow->window()->devicePixelRatio());
-        }
+//            if (visibility == QWindow::Hidden || visibility == QWindow::Minimized || !m_nativeWindow->window()->isActive())
+//                break;
+
+//            const QPoint &pos = Utility::translateCoordinates(QPoint(0, 0), m_nativeWindow->winId(),
+//                                                              DPlatformIntegration::instance()->defaultConnection()->rootWindow());
+//            const QPoint &cursor_pos = qApp->primaryScreen()->handle()->cursor()->pos();
+
+//            return m_clipPath.contains(QPointF(cursor_pos - pos) / m_nativeWindow->window()->devicePixelRatio());
+//        }
         default: break;
         }
     }
@@ -712,11 +717,11 @@ void DPlatformWindowHelper::setClipPath(const QPainterPath &path)
     QPainterPathStroker stroker;
 
     stroker.setJoinStyle(Qt::MiterJoin);
-    stroker.setWidth(2 * m_nativeWindow->window()->devicePixelRatio());
+    stroker.setWidth(4 * m_nativeWindow->window()->devicePixelRatio());
 
     Utility::setShapePath(m_nativeWindow->QNativeWindow::winId(),
                           stroker.createStroke(real_path).united(real_path),
-                          m_frameWindow->m_redirectContent);
+                          m_frameWindow->m_redirectContent || !m_isUserSetClipPath);
 
     updateWindowBlurAreasForWM();
     updateContentPathForFrameWindow();
@@ -1243,16 +1248,15 @@ void DPlatformWindowHelper::onWMHasCompositeChanged()
     m_frameWindow->setShadowRadius(getShadowRadius());
     m_frameWindow->enableRepaintShadow();
 
-    QPainterPath clip_path = m_clipPath * m_nativeWindow->window()->devicePixelRatio();
+//    QPainterPath clip_path = m_clipPath * m_nativeWindow->window()->devicePixelRatio();
 
-    if (DXcbWMSupport::instance()->hasComposite()) {
-        QPainterPathStroker stroker;
+//    if (DXcbWMSupport::instance()->hasComposite()) {
+//        QPainterPathStroker stroker;
 
-        stroker.setJoinStyle(Qt::MiterJoin);
-        stroker.setWidth(1);
-        clip_path = stroker.createStroke(clip_path).united(clip_path);
-    }
-
+//        stroker.setJoinStyle(Qt::MiterJoin);
+//        stroker.setWidth(1);
+//        clip_path = stroker.createStroke(clip_path).united(clip_path);
+//    }
 
     m_frameWindow->updateMask();
     m_frameWindow->setBorderColor(getBorderColor());
