@@ -1,3 +1,9 @@
+deepin-qt5dxcb-plugin (1.1.8.1+ds-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Boyuan Yang <073plan@gmail.com>  Wed, 14 Mar 2018 08:59:38 +0800
+
 deepin-qt5dxcb-plugin (1.1.8+ds-1) unstable; urgency=medium
 
   * New upstream release.
