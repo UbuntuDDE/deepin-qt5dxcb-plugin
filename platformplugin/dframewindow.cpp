@@ -536,6 +536,9 @@ void DFrameWindow::timerEvent(QTimerEvent *event)
         killTimer(m_paintShadowOnContentTimerId);
         m_paintShadowOnContentTimerId = -1;
 
+        if (!m_contentWindow || !m_contentWindow->handle())
+            return QPaintDeviceWindow::timerEvent(event);
+
         QRect rect = m_contentWindow->handle()->geometry();
 
         rect.setTopLeft(QPoint(0, 0));
@@ -903,7 +906,7 @@ void DFrameWindow::updateMask()
 
     if (disableFrame()) {
         QRegion region(m_contentGeometry * devicePixelRatio());
-        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasComposite());
+        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasComposite(), flags().testFlag(Qt::WindowTransparentForInput));
 
         return;
     }
@@ -931,10 +934,10 @@ void DFrameWindow::updateMask()
             p = path;
         }
 
-        Utility::setShapePath(winId(), p, DWMSupport::instance()->hasComposite());
+        Utility::setShapePath(winId(), p, DWMSupport::instance()->hasComposite(), flags().testFlag(Qt::WindowTransparentForInput));
     } else {
         QRegion region((m_contentGeometry * devicePixelRatio()).adjusted(-mouse_margins, -mouse_margins, mouse_margins, mouse_margins));
-        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasComposite());
+        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasComposite(), flags().testFlag(Qt::WindowTransparentForInput));
     }
 
     QPainterPathStroker stroker;
