@@ -169,11 +169,9 @@ void DPlatformWindowHelper::setGeometry(const QRect &rect)
 
     qt_window_private(helper->m_frameWindow)->positionAutomatic = qt_window_private(helper->m_nativeWindow->window())->positionAutomatic;
     helper->m_frameWindow->handle()->setGeometry(rect + content_margins);
-
-    // 未开启重定向时, 可能会导致内容窗口位置不正确
-    if (helper->m_frameWindow->m_redirectContent)
-        helper->setNativeWindowGeometry(rect, true);
-
+    // NOTE(zccrs): 此处必须要更新内容窗口的大小，因为frame窗口大小改变后可能不会触发resize事件调用updateContentWindowGeometry()
+    //              就会导致内容窗口大小不对，此问题可在文件管理器复制文件对话框重现（多试几次）
+    helper->setNativeWindowGeometry(rect, true);
     helper->m_nativeWindow->QPlatformWindow::setGeometry(rect);
 }
 
@@ -508,7 +506,7 @@ bool DPlatformWindowHelper::isAlertState() const
     return me()->m_frameWindow->handle()->isAlertState();
 }
 
-bool DPlatformWindowHelper::windowRedirectContent(const QWindow *window)
+bool DPlatformWindowHelper::windowRedirectContent(QWindow *window)
 {
     const QVariant &value = window->property(redirectContent);
 
@@ -518,10 +516,13 @@ bool DPlatformWindowHelper::windowRedirectContent(const QWindow *window)
     if (qEnvironmentVariableIsSet("DXCB_REDIRECT_CONTENT")) {
         const QByteArray &value = qgetenv("DXCB_REDIRECT_CONTENT");
 
-        if (value == "true")
+        if (value == "true") {
+            window->setProperty(redirectContent, true);
+
             return true;
-        else if (value == "false")
+        } else if (value == "false") {
             return false;
+        }
     }
 
     return window->surfaceType() == QSurface::OpenGLSurface;
