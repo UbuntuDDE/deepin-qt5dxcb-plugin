@@ -163,6 +163,17 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
 //        }
 //    }
 
+    if (window->type() != Qt::Desktop && !frame_window) {
+        if (window->property(groupLeader).isValid()) {
+            Utility::setWindowGroup(w->winId(), qvariant_cast<quint32>(window->property(groupLeader)));
+        }
+#ifdef Q_OS_LINUX
+        else {
+            Utility::setWindowGroup(w->winId(), xcbConnection()->clientLeader());
+        }
+#endif
+    }
+
     return xw;
 }
 
@@ -683,7 +694,14 @@ void DPlatformIntegration::initialize()
 bool DPlatformIntegration::isWindowBlockedHandle(QWindow *window, QWindow **blockingWindow)
 {
     if (DFrameWindow *frame = qobject_cast<DFrameWindow*>(window)) {
-        return VtableHook::callOriginalFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked, frame->m_contentWindow, blockingWindow);
+        bool blocked = VtableHook::callOriginalFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked, frame->m_contentWindow, blockingWindow);
+
+        // NOTE(zccrs): 将内容窗口的blocked状态转移到frame窗口，否则会被QXcbWindow::relayFocusToModalWindow重复调用requestActivate而引起死循环
+        if (blockingWindow && frame->m_contentWindow.data() == *blockingWindow) {
+            *blockingWindow = window;
+        }
+
+        return blocked;
     }
 
     return VtableHook::callOriginalFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked, window, blockingWindow);
