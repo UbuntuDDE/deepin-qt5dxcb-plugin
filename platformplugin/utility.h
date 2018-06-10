@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,8 +55,8 @@ public:
     static void cancelWindowMoveResize(quint32 WId);
     static void showWindowSystemMenu(quint32 WId, QPoint globalPos = QPoint());
     static void setFrameExtents(WId wid, const QMargins &margins);
-    static void setShapeRectangles(quint32 WId, const QRegion &region, bool onlyInput = true);
-    static void setShapePath(quint32 WId, const QPainterPath &path, bool onlyInput = true);
+    static void setShapeRectangles(quint32 WId, const QRegion &region, bool onlyInput = true, bool transparentInput = false);
+    static void setShapePath(quint32 WId, const QPainterPath &path, bool onlyInput = true, bool transparentInput = false);
     static void startWindowSystemResize(quint32 WId, CornerEdge cornerEdge, const QPoint &globalPos = QPoint());
     static bool setWindowCursor(quint32 WId, CornerEdge ce);
 
@@ -64,6 +64,7 @@ public:
 
     static QByteArray windowProperty(quint32 WId, xcb_atom_t propAtom, xcb_atom_t typeAtom, quint32 len);
     static void setWindowProperty(quint32 WId, xcb_atom_t propAtom, xcb_atom_t typeAtom, const void *data, quint32 len, uint8_t format = 8);
+    static void clearWindowProperty(quint32 WId, xcb_atom_t propAtom);
 
     struct BlurArea {
         qint32 x;
@@ -102,6 +103,7 @@ public:
     static bool blurWindowBackground(const quint32 WId, const QVector<BlurArea> &areas);
     static bool blurWindowBackgroundByPaths(const quint32 WId, const QList<QPainterPath> &paths);
     static bool blurWindowBackgroundByImage(const quint32 WId, const QRect &blurRect, const QImage &maskImage);
+    static void clearWindowBlur(const quint32 WId);
 
     static quint32 getWorkspaceForWindow(quint32 WId);
     static QVector<quint32> getWindows();
@@ -119,6 +121,11 @@ public:
 
     static QPoint translateCoordinates(const QPoint &pos, quint32 src, quint32 dst);
     static QRect windowGeometry(quint32 WId);
+
+    static quint32 clientLeader();
+    static quint32 createGroupWindow();
+    static void destoryGroupWindow(quint32 groupLeader);
+    static void setWindowGroup(quint32 window, quint32 groupLeader);
 
 #ifdef Q_OS_LINUX
     static int XIconifyWindow(void *display, quint32 w, int screen_number);

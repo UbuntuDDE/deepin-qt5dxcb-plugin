@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ DPP_BEGIN_NAMESPACE
 
 QHash<quintptr**, quintptr*> VtableHook::objToOriginalVfptr;
 QHash<void*, quintptr*> VtableHook::objToGhostVfptr;
+QMap<void*, quintptr> VtableHook::objDestructFun;
 
 bool VtableHook::copyVtable(quintptr **obj)
 {
@@ -50,18 +51,34 @@ bool VtableHook::copyVtable(quintptr **obj)
 
 bool VtableHook::clearGhostVtable(void *obj)
 {
+    objToOriginalVfptr.remove((quintptr**)obj);
+    objDestructFun.remove(obj);
+
     quintptr *vtable = objToGhostVfptr.take(obj);
 
     if (vtable) {
-        quintptr **obj_ptr = (quintptr**)obj;
-        objToOriginalVfptr.remove(obj_ptr);
-
         delete[] vtable;
 
         return true;
     }
 
     return false;
+}
+
+void VtableHook::autoCleanVtable(void *obj)
+{
+    quintptr fun = objDestructFun.value(obj);
+
+    if (!fun)
+        return;
+
+    typedef void(*Destruct)(void*);
+    Destruct destruct = *reinterpret_cast<Destruct*>(&fun);
+    // call origin destruct function
+    destruct(obj);
+
+    // clean
+    clearGhostVtable(obj);
 }
 
 DPP_END_NAMESPACE

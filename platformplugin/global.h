@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #define DEFINE_CONST_CHAR(Name) const char Name[] = "_d_" #Name
 
 DEFINE_CONST_CHAR(useDxcb);
+DEFINE_CONST_CHAR(redirectContent);
 DEFINE_CONST_CHAR(netWmStates);
 DEFINE_CONST_CHAR(windowRadius);
 DEFINE_CONST_CHAR(borderWidth);
@@ -51,6 +52,7 @@ DEFINE_CONST_CHAR(windowBlurAreas);
 DEFINE_CONST_CHAR(windowBlurPaths);
 DEFINE_CONST_CHAR(autoInputMaskByClipPath);
 DEFINE_CONST_CHAR(popupSystemWindowMenu);
+DEFINE_CONST_CHAR(groupLeader);
 
 // functions
 DEFINE_CONST_CHAR(setWmBlurWindowBackgroundArea);
@@ -70,11 +72,24 @@ DEFINE_CONST_CHAR(setMWMDecorations);
 DEFINE_CONST_CHAR(getMWMDecorations);
 DEFINE_CONST_CHAR(connectWindowMotifWMHintsChanged);
 DEFINE_CONST_CHAR(setWindowProperty);
+DEFINE_CONST_CHAR(pluginVersion);
+DEFINE_CONST_CHAR(disableOverrideCursor);
+DEFINE_CONST_CHAR(inputEventSourceDevice);
+DEFINE_CONST_CHAR(createGroupWindow);
+DEFINE_CONST_CHAR(destoryGroupWindow);
+DEFINE_CONST_CHAR(setWindowGroup);
+DEFINE_CONST_CHAR(clientLeader);
 
 // others
 DEFINE_CONST_CHAR(WmWindowTypes);
 DEFINE_CONST_CHAR(WmNetDesktop);
 DEFINE_CONST_CHAR(WmClass);
 DEFINE_CONST_CHAR(ProcessId);
+
+enum DeviceType {
+    UnknowDevice,
+    TouchapdDevice,
+    MouseDevice
+};
 
 #endif // GLOBAL_H

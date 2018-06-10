@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,6 +100,8 @@ public:
     void setAlertState(bool enabled);
     bool isAlertState() const;
 
+    static bool windowRedirectContent(QWindow *window);
+
 private:
     bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
     void setNativeWindowGeometry(const QRect &rect, bool onlyResize = false);
@@ -112,7 +114,7 @@ private:
     void updateContentPathForFrameWindow();
     void updateContentWindowGeometry();
 #ifdef Q_OS_LINUX
-    void updateContentWindowNormalHints();
+    void updateWindowNormalHints();
 #endif
 
     int getWindowRadius() const;

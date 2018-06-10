@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
+ * Author:     zccrs <zccrs@live.com>
+ *
+ * Maintainer: zccrs <zhangjide@deepin.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -14,26 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef DHIGHDPI_H
+#define DHIGHDPI_H
 
-#ifndef DPLATFORMNATIVEINTERFACE_H
-#define DPLATFORMNATIVEINTERFACE_H
-
-#include <QtGlobal>
-
-#include "global.h"
+#include <QPointF>
 
 QT_BEGIN_NAMESPACE
-class QPlatformNativeInterface;
+class QWindow;
 QT_END_NAMESPACE
 
-DPP_BEGIN_NAMESPACE
-
-class DPlatformNativeInterfaceHook
+class DHighDpi
 {
 public:
-    static QFunctionPointer platformFunction(QPlatformNativeInterface *interface, const QByteArray &function);
+    static QPointF fromNativePixels(const QPointF &pixelPoint, const QWindow *window);
 };
 
-DPP_END_NAMESPACE
-
-#endif // DPLATFORMNATIVEINTERFACE_H
+#endif // DHIGHDPI_H

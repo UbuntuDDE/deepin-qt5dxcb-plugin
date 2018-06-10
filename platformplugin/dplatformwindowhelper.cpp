@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include "dwmsupport.h"
 
 #ifdef Q_OS_LINUX
+#include "xcbnativeeventfilter.h"
+
 #include "qxcbwindow.h"
 
 #include <xcb/xcb_icccm.h>
@@ -45,6 +47,7 @@ PUBLIC_CLASS(QWindow, DPlatformWindowHelper);
 PUBLIC_CLASS(QMouseEvent, DPlatformWindowHelper);
 PUBLIC_CLASS(QDropEvent, DPlatformWindowHelper);
 PUBLIC_CLASS(QNativeWindow, DPlatformWindowHelper);
+PUBLIC_CLASS(QWheelEvent, DPlatformWindowHelper);
 
 QHash<const QPlatformWindow*, DPlatformWindowHelper*> DPlatformWindowHelper::mapped;
 
@@ -54,7 +57,7 @@ DPlatformWindowHelper::DPlatformWindowHelper(QNativeWindow *window)
 {
     mapped[window] = this;
 
-    m_frameWindow = new DFrameWindow();
+    m_frameWindow = new DFrameWindow(window->window());
     m_frameWindow->setFlags((window->window()->flags() | Qt::FramelessWindowHint | Qt::CustomizeWindowHint | Qt::NoDropShadowWindowHint) & ~Qt::WindowMinMaxButtonsHint);
     m_frameWindow->create();
     m_frameWindow->installEventFilter(this);
@@ -66,9 +69,6 @@ DPlatformWindowHelper::DPlatformWindowHelper(QNativeWindow *window)
     m_frameWindow->setEnableSystemMove(m_enableSystemMove);
     m_frameWindow->setEnableSystemResize(m_enableSystemResize);
 
-    m_frameWindow->m_contentWindow = window->window();
-    m_frameWindow->setProperty("_d_real_content_window", (quintptr)m_frameWindow->m_contentWindow.data());
-
     window->setParent(m_frameWindow->handle());
     window->window()->installEventFilter(this);
     window->window()->setScreen(m_frameWindow->screen());
@@ -76,9 +76,11 @@ DPlatformWindowHelper::DPlatformWindowHelper(QNativeWindow *window)
     window->window()->setProperty(::frameMargins, QVariant::fromValue(m_frameWindow->contentMarginsHint()));
 
 #ifdef Q_OS_LINUX
-    xcb_composite_redirect_window(window->xcb_connection(), window->xcb_window(), XCB_COMPOSITE_REDIRECT_MANUAL);
-    damage_id = xcb_generate_id(window->xcb_connection());
-    xcb_damage_create(window->xcb_connection(), damage_id, window->xcb_window(), XCB_DAMAGE_REPORT_LEVEL_NON_EMPTY);
+    if (windowRedirectContent(window->window())) {
+        xcb_composite_redirect_window(window->xcb_connection(), window->xcb_window(), XCB_COMPOSITE_REDIRECT_MANUAL);
+        damage_id = xcb_generate_id(window->xcb_connection());
+        xcb_damage_create(window->xcb_connection(), damage_id, window->xcb_window(), XCB_DAMAGE_REPORT_LEVEL_NON_EMPTY);
+    }
 #endif
 
     updateClipPathByWindowRadius(window->window()->size());
@@ -144,8 +146,6 @@ DPlatformWindowHelper::DPlatformWindowHelper(QNativeWindow *window)
 DPlatformWindowHelper::~DPlatformWindowHelper()
 {
     mapped.remove(m_nativeWindow);
-    VtableHook::clearGhostVtable(static_cast<QPlatformWindow*>(m_nativeWindow));
-
     m_frameWindow->deleteLater();
 
 #ifdef Q_OS_LINUX
@@ -172,6 +172,9 @@ void DPlatformWindowHelper::setGeometry(const QRect &rect)
 
     qt_window_private(helper->m_frameWindow)->positionAutomatic = qt_window_private(helper->m_nativeWindow->window())->positionAutomatic;
     helper->m_frameWindow->handle()->setGeometry(rect + content_margins);
+    // NOTE(zccrs): 此处必须要更新内容窗口的大小，因为frame窗口大小改变后可能不会触发resize事件调用updateContentWindowGeometry()
+    //              就会导致内容窗口大小不对，此问题可在文件管理器复制文件对话框重现（多试几次）
+    helper->setNativeWindowGeometry(rect, true);
     helper->m_nativeWindow->QPlatformWindow::setGeometry(rect);
 }
 
@@ -305,13 +308,29 @@ void DPlatformWindowHelper::setVisible(bool visible)
         helper->updateWindowBlurAreasForWM();
 
         // restore
-        if (tp)
+        if (tp) {
             helper->m_nativeWindow->window()->setTransientParent(tp);
-
+        }
 #ifdef Q_OS_LINUX
+        else {
+            xcb_delete_property(window->xcb_connection(), window->m_window, XCB_ATOM_WM_TRANSIENT_FOR);
+        }
+
         // Fix the window can't show minimized if window is fixed size
         Utility::setMotifWmHints(window->m_window, mwmhints);
         Utility::setMotifWmHints(helper->m_nativeWindow->QNativeWindow::winId(), cw_hints);
+
+        if (helper->m_nativeWindow->window()->modality() != Qt::NonModal) {
+            window->setNetWmStates(window->netWmStates() | QNativeWindow::NetWmStateModal);
+        }
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+        // 当Qt版本在5.9及以上时, 如果窗口设置了BypassWindowManagerHint标志, 窗口就无法通过鼠标点击获得焦点
+        if (helper->m_nativeWindow->window()->flags().testFlag(Qt::BypassWindowManagerHint)
+                && QGuiApplication::modalWindow() == helper->m_nativeWindow->window()) {
+            helper->m_nativeWindow->requestActivateWindow();
+        }
 #endif
 
         return;
@@ -319,6 +338,7 @@ void DPlatformWindowHelper::setVisible(bool visible)
 
     helper->m_frameWindow->setVisible(visible);
     helper->m_nativeWindow->QNativeWindow::setVisible(visible);
+    helper->updateWindowBlurAreasForWM();
 }
 
 void DPlatformWindowHelper::setWindowFlags(Qt::WindowFlags flags)
@@ -443,9 +463,6 @@ void DPlatformWindowHelper::requestActivateWindow()
 {
     DPlatformWindowHelper *helper = me();
 
-    if (helper->m_nativeWindow->window()->isActive())
-        return;
-
 #ifdef Q_OS_LINUX
     if (helper->m_frameWindow->handle()->isExposed() && !DXcbWMSupport::instance()->hasComposite()
             && helper->m_frameWindow->windowState() == Qt::WindowMinimized) {
@@ -500,13 +517,35 @@ bool DPlatformWindowHelper::isAlertState() const
     return me()->m_frameWindow->handle()->isAlertState();
 }
 
+bool DPlatformWindowHelper::windowRedirectContent(QWindow *window)
+{
+    const QVariant &value = window->property(redirectContent);
+
+    if (value.type() == QVariant::Bool)
+        return value.toBool();
+
+    if (qEnvironmentVariableIsSet("DXCB_REDIRECT_CONTENT")) {
+        const QByteArray &value = qgetenv("DXCB_REDIRECT_CONTENT");
+
+        if (value == "true") {
+            window->setProperty(redirectContent, true);
+
+            return true;
+        } else if (value == "false") {
+            return false;
+        }
+    }
+
+    return window->surfaceType() == QSurface::OpenGLSurface;
+}
+
 bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
 {
     if (watched == m_frameWindow) {
         switch ((int)event->type()) {
         case QEvent::Close:
             m_nativeWindow->window()->close();
-            break;
+            return true;
         case QEvent::KeyPress:
         case QEvent::KeyRelease:
         case QEvent::WindowDeactivate:
@@ -532,23 +571,20 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
             return true;
         case QEvent::Resize: {
             updateContentWindowGeometry();
-
-            const QMargins &frame_margin = m_frameWindow->contentMarginsHint();
-            QSize size_dif(frame_margin.left() + frame_margin.right(),
-                           frame_margin.top() + frame_margin.bottom());
-
-            QResizeEvent *ev = static_cast<QResizeEvent*>(event);
-            QResizeEvent re(ev->size() - size_dif, ev->oldSize() - size_dif);
-            qApp->sendEvent(m_nativeWindow->window(), &re);
             break;
         }
         case QEvent::MouseButtonPress:
         case QEvent::MouseButtonRelease:
         case QEvent::MouseMove: {
             DQMouseEvent *e = static_cast<DQMouseEvent*>(event);
+            const QRectF rectF(m_windowVaildGeometry);
+            const QPointF posF(e->localPos() - m_frameWindow->contentOffsetHint());
 
-            if (QRectF(m_windowVaildGeometry).contains(e->localPos() - m_frameWindow->contentOffsetHint())) {
-                m_frameWindow->setCursor(Qt::ArrowCursor);
+            // QRectF::contains中判断时加入了右下边界
+            if (!qFuzzyCompare(posF.x(), rectF.width())
+                    && !qFuzzyCompare(posF.y(), rectF.height())
+                    && rectF.contains(posF)) {
+                m_frameWindow->unsetCursor();
                 e->l = e->w = m_nativeWindow->window()->mapFromGlobal(e->globalPos());
                 qApp->sendEvent(m_nativeWindow->window(), e);
 
@@ -557,20 +593,37 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
 
             break;
         }
-        case QEvent::WindowStateChange:
-            qt_window_private(m_nativeWindow->window())->windowState = m_frameWindow->windowState();
+        case QEvent::WindowStateChange: {
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+            Qt::WindowState old_state = qt_window_private(m_nativeWindow->window())->windowState;
+            Qt::WindowState new_state = m_frameWindow->windowState();
+#else
+            Qt::WindowStates old_state = qt_window_private(m_nativeWindow->window())->windowState;
+            Qt::WindowStates new_state = m_frameWindow->windowState();
+#endif
+
+            qt_window_private(m_nativeWindow->window())->windowState = new_state;
             QCoreApplication::sendEvent(m_nativeWindow->window(), event);
             updateClipPathByWindowRadius(m_nativeWindow->window()->size());
+
+            // need repaint content window
+            if ((old_state == Qt::WindowFullScreen || old_state == Qt::WindowMaximized)
+                    && new_state == Qt::WindowNoState) {
+                if (m_frameWindow->m_paintShadowOnContentTimerId < 0 && m_frameWindow->m_contentBackingStore) {
+                    m_frameWindow->m_paintShadowOnContentTimerId = m_frameWindow->startTimer(0, Qt::PreciseTimer);
+                }
+            }
             break;
+        }
         case QEvent::DragEnter:
         case QEvent::DragMove:
-        case QEvent::DragLeave:
         case QEvent::Drop: {
             DQDropEvent *e = static_cast<DQDropEvent*>(event);
             e->p -= m_frameWindow->contentOffsetHint();
+        } // deliberate
+        case QEvent::DragLeave:
             QCoreApplication::sendEvent(m_nativeWindow->window(), event);
             return true;
-        }
         case QEvent::PlatformSurface: {
             const QPlatformSurfaceEvent *e = static_cast<QPlatformSurfaceEvent*>(event);
 
@@ -578,6 +631,13 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
                 m_nativeWindow->window()->destroy();
 
             break;
+        }
+        case QEvent::Expose: {
+            // ###(zccrs): 在频繁切换窗口管理器时，可能会出现frame窗口被外部（可能是窗管）调用map
+            //             但是content窗口还是隐藏状态，所以在此做状态检查和同步
+            if (m_frameWindow->handle()->isExposed() && !m_nativeWindow->isExposed()) {
+                m_nativeWindow->setVisible(true);
+            }
         }
         default: break;
         }
@@ -609,6 +669,26 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
             }
             break;
         }
+#if QT_VERSION > QT_VERSION_CHECK(5, 6, 1)
+        // NOTE(zccrs): https://codereview.qt-project.org/#/c/162027/ (QTBUG-53993)
+        case QEvent::MouseButtonPress: {
+            QWindow *w = m_nativeWindow->window();
+
+            if (w->flags().testFlag(Qt::BypassWindowManagerHint)) {
+                const QMouseEvent *me = static_cast<QMouseEvent*>(event);
+
+                if (me->button() == Qt::LeftButton && w != QGuiApplication::focusWindow()) {
+                    if (!(w->flags() & (Qt::WindowDoesNotAcceptFocus))
+                            && w->type() != Qt::ToolTip
+                            && w->type() != Qt::Popup) {
+                        w->requestActivate();
+                    }
+                }
+            }
+
+            break;
+        }
+#endif
         case QEvent::MouseButtonRelease: {
             if (m_frameWindow->m_isSystemMoveResizeState) {
                 Utility::cancelWindowMoveResize(Utility::getNativeTopLevelWindow(m_frameWindow->winId()));
@@ -632,13 +712,34 @@ bool DPlatformWindowHelper::eventFilter(QObject *watched, QEvent *event)
                 updateClipPathByWindowRadius(static_cast<QResizeEvent*>(event)->size());
             }
             break;
-        case QEvent::Leave: {
-            const QPoint &pos = Utility::translateCoordinates(QPoint(0, 0), m_nativeWindow->winId(),
-                                                              DPlatformIntegration::instance()->defaultConnection()->rootWindow());
-            const QPoint &cursor_pos = qApp->primaryScreen()->handle()->cursor()->pos();
+// ###(zccrs): 在9b1a28e6这个提交中因为调用了内部窗口的setVisible，所以需要过滤掉visible为false时产生的不必要的Leave事件
+//             这段代码会引起窗口被其它窗口覆盖时的Leave事件丢失
+//             因为已经移除了setVisible相关的代码，故先注释掉这部分代码，看是否有不良影响
+//        case QEvent::Leave: {
+//            QWindow::Visibility visibility = m_nativeWindow->window()->visibility();
 
-            return m_clipPath.contains(QPointF(cursor_pos - pos) / m_nativeWindow->window()->devicePixelRatio());
+//            if (visibility == QWindow::Hidden || visibility == QWindow::Minimized || !m_nativeWindow->window()->isActive())
+//                break;
+
+//            const QPoint &pos = Utility::translateCoordinates(QPoint(0, 0), m_nativeWindow->winId(),
+//                                                              DPlatformIntegration::instance()->defaultConnection()->rootWindow());
+//            const QPoint &cursor_pos = qApp->primaryScreen()->handle()->cursor()->pos();
+
+//            return m_clipPath.contains(QPointF(cursor_pos - pos) / m_nativeWindow->window()->devicePixelRatio());
+//        }
+#ifdef Q_OS_LINUX
+        case QEvent::Wheel: {
+            // ###(zccrs): Qt的bug，QWidgetWindow往QWidget中转发QWheelEvent时没有调用setTimestamp
+            //             暂时使用这种低等的方案绕过此问题
+            DQWheelEvent *ev = static_cast<DQWheelEvent*>(event);
+            const DeviceType type = DPlatformIntegration::instance()->eventFilter()->xiEventSource(ev);
+
+            if (type != UnknowDevice)
+                ev->mouseState |= Qt::MouseButton(Qt::MaxMouseButton + type);
+
+            break;
         }
+#endif
         default: break;
         }
     }
@@ -653,7 +754,7 @@ void DPlatformWindowHelper::setNativeWindowGeometry(const QRect &rect, bool only
     m_nativeWindow->QNativeWindow::setGeometry(rect);
     qt_window_private(m_nativeWindow->window())->parentWindow = 0;
     qt_window_private(m_nativeWindow->window())->positionAutomatic = false;
-    updateContentWindowNormalHints();
+    updateWindowNormalHints();
 }
 
 void DPlatformWindowHelper::updateClipPathByWindowRadius(const QSize &windowSize)
@@ -686,11 +787,12 @@ void DPlatformWindowHelper::setClipPath(const QPainterPath &path)
     QPainterPathStroker stroker;
 
     stroker.setJoinStyle(Qt::MiterJoin);
-    stroker.setWidth(1);
+    stroker.setWidth(4 * m_nativeWindow->window()->devicePixelRatio());
 
     Utility::setShapePath(m_nativeWindow->QNativeWindow::winId(),
                           stroker.createStroke(real_path).united(real_path),
-                          true);
+                          m_frameWindow->m_redirectContent || !m_isUserSetClipPath,
+                          m_nativeWindow->window()->flags().testFlag(Qt::WindowTransparentForInput));
 
     updateWindowBlurAreasForWM();
     updateContentPathForFrameWindow();
@@ -703,11 +805,21 @@ void DPlatformWindowHelper::setWindowVaildGeometry(const QRect &geometry)
 
     m_windowVaildGeometry = geometry;
 
-    updateWindowBlurAreasForWM();
+    // The native window geometry may not update now, need to waiting for reisze
+    // event is procceed.
+    QTimer::singleShot(1, this, &DPlatformWindowHelper::updateWindowBlurAreasForWM);
 }
 
 bool DPlatformWindowHelper::updateWindowBlurAreasForWM()
 {
+    // NOTE(zccrs): 当窗口unmap时清理模糊区域的属性，否则可能会导致窗口已经隐藏，但模糊区域没有消失的问题。因为窗口管理器不是绝对根据窗口是否map来绘制
+    //              模糊背景，当窗口unmap但是窗口的WM State值为Normal时也会绘制模糊背景（这种情况可能出现在连续多次快速切换窗口管理器时）
+    if (!m_nativeWindow->window()->isVisible() || (!m_enableBlurWindow && m_blurAreaList.isEmpty() && m_blurPathList.isEmpty())) {
+        Utility::clearWindowBlur(m_frameWindow->winId());
+
+        return true;
+    }
+
     qreal device_pixel_ratio = m_nativeWindow->window()->devicePixelRatio();
     const QRect &windowValidRect = m_windowVaildGeometry * device_pixel_ratio;
 
@@ -840,7 +952,7 @@ void DPlatformWindowHelper::updateSizeHints()
     qt_window_private(m_frameWindow)->sizeIncrement = m_nativeWindow->window()->sizeIncrement();
 
     m_frameWindow->handle()->propagateSizeHints();
-    updateContentWindowNormalHints();
+    updateWindowNormalHints();
 }
 
 void DPlatformWindowHelper::updateContentPathForFrameWindow()
@@ -866,7 +978,7 @@ void DPlatformWindowHelper::updateContentWindowGeometry()
 }
 
 #ifdef Q_OS_LINUX
-void DPlatformWindowHelper::updateContentWindowNormalHints()
+void DPlatformWindowHelper::updateWindowNormalHints()
 {
     // update WM_NORMAL_HINTS
     xcb_size_hints_t hints;
@@ -875,13 +987,46 @@ void DPlatformWindowHelper::updateContentWindowNormalHints()
     xcb_icccm_size_hints_set_resize_inc(&hints, 1, 1);
     xcb_icccm_set_wm_normal_hints(m_nativeWindow->xcb_connection(),
                                   m_nativeWindow->xcb_window(), &hints);
+
+    QSize size_inc = m_frameWindow->sizeIncrement();
+
+    if (size_inc.isEmpty())
+        size_inc = QSize(1, 1);
+
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(m_nativeWindow->xcb_connection(), m_frameWindow->winId());
+
+    if (xcb_get_property_reply_t *reply = xcb_get_property_reply(m_nativeWindow->xcb_connection(), cookie, 0)) {
+        xcb_icccm_get_wm_size_hints_from_reply(&hints, reply);
+        free(reply);
+
+        if (hints.width_inc == 1 && hints.height_inc == 1) {
+            return;
+        }
+    } else {
+        return;
+    }
+
+    xcb_icccm_size_hints_set_resize_inc(&hints, size_inc.width(), size_inc.height());
+    xcb_icccm_set_wm_normal_hints(m_nativeWindow->xcb_connection(),
+                                  m_frameWindow->winId(), &hints);
 }
 #endif
 
 int DPlatformWindowHelper::getWindowRadius() const
 {
-    if (m_frameWindow->windowState() == Qt::WindowFullScreen)
+//#ifdef Q_OS_LINUX
+//    QNativeWindow::NetWmStates states = static_cast<DQNativeWindow*>(m_frameWindow->handle())->netWmStates();
+
+//    if (states.testFlag(QNativeWindow::NetWmStateFullScreen)
+//            || states.testFlag(QNativeWindow::NetWmState(QNativeWindow::NetWmStateMaximizedHorz
+//                                                         | QNativeWindow::NetWmStateMaximizedVert))) {
+//        return 0;
+//    }
+//#else
+    if (m_frameWindow->windowState() == Qt::WindowFullScreen
+            || m_frameWindow->windowState() == Qt::WindowMaximized)
         return 0;
+//#endif
 
     return (m_isUserSetWindowRadius || DWMSupport::instance()->hasComposite()) ? m_windowRadius : 0;
 }
@@ -1192,16 +1337,15 @@ void DPlatformWindowHelper::onWMHasCompositeChanged()
     m_frameWindow->setShadowRadius(getShadowRadius());
     m_frameWindow->enableRepaintShadow();
 
-    QPainterPath clip_path = m_clipPath * m_nativeWindow->window()->devicePixelRatio();
+//    QPainterPath clip_path = m_clipPath * m_nativeWindow->window()->devicePixelRatio();
 
-    if (DXcbWMSupport::instance()->hasComposite()) {
-        QPainterPathStroker stroker;
+//    if (DXcbWMSupport::instance()->hasComposite()) {
+//        QPainterPathStroker stroker;
 
-        stroker.setJoinStyle(Qt::MiterJoin);
-        stroker.setWidth(1);
-        clip_path = stroker.createStroke(clip_path).united(clip_path);
-    }
-
+//        stroker.setJoinStyle(Qt::MiterJoin);
+//        stroker.setWidth(1);
+//        clip_path = stroker.createStroke(clip_path).united(clip_path);
+//    }
 
     m_frameWindow->updateMask();
     m_frameWindow->setBorderColor(getBorderColor());

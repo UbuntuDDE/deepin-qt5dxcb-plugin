@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #endif
 
 #include <xcb/shape.h>
+#include <xcb/xcb_icccm.h>
 
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
@@ -229,12 +230,21 @@ static QVector<xcb_rectangle_t> qregion2XcbRectangles(const QRegion &region)
     return rectangles;
 }
 
-static void setShapeRectangles(quint32 WId, const QVector<xcb_rectangle_t> &rectangles, bool onlyInput)
+static void setShapeRectangles(quint32 WId, const QVector<xcb_rectangle_t> &rectangles, bool onlyInput, bool transparentInput = false)
 {
     xcb_shape_mask(QX11Info::connection(), XCB_SHAPE_SO_SET,
-                   XCB_SHAPE_SK_INPUT, WId, 0, 0, XCB_NONE);
-    xcb_shape_mask(QX11Info::connection(), XCB_SHAPE_SO_SET,
                    XCB_SHAPE_SK_BOUNDING, WId, 0, 0, XCB_NONE);
+
+    if (transparentInput) {
+        xcb_shape_rectangles(QX11Info::connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT,
+                             XCB_CLIP_ORDERING_YX_BANDED, WId, 0, 0, 0, 0);
+
+        if (onlyInput)
+            return;
+    } else {
+        xcb_shape_mask(QX11Info::connection(), XCB_SHAPE_SO_SET,
+                       XCB_SHAPE_SK_INPUT, WId, 0, 0, XCB_NONE);
+    }
 
     if (rectangles.isEmpty()) {
         return;
@@ -244,15 +254,15 @@ static void setShapeRectangles(quint32 WId, const QVector<xcb_rectangle_t> &rect
                          XCB_CLIP_ORDERING_YX_BANDED, WId, 0, 0, rectangles.size(), rectangles.constData());
 }
 
-void Utility::setShapeRectangles(quint32 WId, const QRegion &region, bool onlyInput)
+void Utility::setShapeRectangles(quint32 WId, const QRegion &region, bool onlyInput, bool transparentInput)
 {
-    ::setShapeRectangles(WId, qregion2XcbRectangles(region), onlyInput);
+    ::setShapeRectangles(WId, qregion2XcbRectangles(region), onlyInput, transparentInput);
 }
 
-void Utility::setShapePath(quint32 WId, const QPainterPath &path, bool onlyInput)
+void Utility::setShapePath(quint32 WId, const QPainterPath &path, bool onlyInput, bool transparentInput)
 {
     if (path.isEmpty()) {
-        return ::setShapeRectangles(WId, QVector<xcb_rectangle_t>(), onlyInput);
+        return ::setShapeRectangles(WId, QVector<xcb_rectangle_t>(), onlyInput, transparentInput);
     }
 
     QVector<xcb_rectangle_t> rectangles;
@@ -270,7 +280,7 @@ void Utility::setShapePath(quint32 WId, const QPainterPath &path, bool onlyInput
         }
     }
 
-    ::setShapeRectangles(WId, rectangles, onlyInput);
+    ::setShapeRectangles(WId, rectangles, onlyInput, transparentInput);
 }
 
 void Utility::sendMoveResizeMessage(quint32 WId, uint32_t action, QPoint globalPos, Qt::MouseButton qbutton)
@@ -411,6 +421,11 @@ void Utility::setWindowProperty(quint32 WId, xcb_atom_t propAtom, xcb_atom_t typ
     xcb_flush(conn);
 }
 
+void Utility::clearWindowProperty(quint32 WId, xcb_atom_t propAtom)
+{
+    xcb_delete_property_checked(QX11Info::connection(), WId, propAtom);
+}
+
 bool Utility::hasBlurWindow()
 {
     return  DXcbWMSupport::instance()->hasBlurWindow();
@@ -438,6 +453,7 @@ bool Utility::blurWindowBackground(const quint32 WId, const QVector<BlurArea> &a
             areas << BlurArea();
         }
 
+        clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask);
         setWindowProperty(WId, atom, XCB_ATOM_CARDINAL, areas.constData(), areas.size() * sizeof(BlurArea) / sizeof(quint32), sizeof(quint32) * 8);
     } else {
         xcb_atom_t atom = DXcbWMSupport::instance()->_kde_net_wm_blur_rehind_region_atom;
@@ -463,6 +479,7 @@ bool Utility::blurWindowBackground(const quint32 WId, const QVector<BlurArea> &a
             }
         }
 
+        clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask);
         setWindowProperty(WId, atom, XCB_ATOM_CARDINAL, rects.constData(), rects.size(), sizeof(quint32) * 8);
     }
 
@@ -492,7 +509,7 @@ bool Utility::blurWindowBackgroundByPaths(const quint32 WId, const QList<QPainte
         }
 
         return blurWindowBackgroundByImage(WId, boundingRect, image);
-    } else {
+    } else if (DXcbWMSupport::instance()->isKwin()) {
         xcb_atom_t atom = DXcbWMSupport::instance()->_kde_net_wm_blur_rehind_region_atom;
 
         if (atom == XCB_NONE)
@@ -529,11 +546,19 @@ bool Utility::blurWindowBackgroundByImage(const quint32 WId, const QRect &blurRe
     array.append((const char*)area.constData(), sizeof(qint32) / sizeof(char) * area.size());
     array.append((const char*)maskImage.constBits(), maskImage.byteCount());
 
+    clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_rounded_atom);
     setWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask,
                       DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask,
                       array.constData(), array.length(), 8);
 
     return true;
+}
+
+void Utility::clearWindowBlur(const quint32 WId)
+{
+    clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_rounded_atom);
+    clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask);
+    clearWindowProperty(WId, DXcbWMSupport::instance()->_kde_net_wm_blur_rehind_region_atom);
 }
 
 quint32 Utility::getWorkspaceForWindow(quint32 WId)
@@ -685,6 +710,90 @@ QRect Utility::windowGeometry(quint32 WId)
     }
 
     return rect;
+}
+
+quint32 Utility::clientLeader()
+{
+    return DPlatformIntegration::xcbConnection()->clientLeader();
+}
+
+quint32 Utility::createGroupWindow()
+{
+    QXcbConnection *connection = DPlatformIntegration::xcbConnection();
+    uint32_t group_leader = xcb_generate_id(connection->xcb_connection());
+    QXcbScreen *screen = connection->primaryScreen();
+    xcb_create_window(connection->xcb_connection(),
+                      XCB_COPY_FROM_PARENT,
+                      group_leader,
+                      screen->root(),
+                      0, 0, 1, 1,
+                      0,
+                      XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                      screen->screen()->root_visual,
+                      0, 0);
+//#ifndef QT_NO_DEBUG
+    QByteArray ba("Qt(dxcb) group leader window");
+    xcb_change_property(connection->xcb_connection(),
+                        XCB_PROP_MODE_REPLACE,
+                        group_leader,
+                        connection->atom(QXcbAtom::_NET_WM_NAME),
+                        connection->atom(QXcbAtom::UTF8_STRING),
+                        8,
+                        ba.length(),
+                        ba.constData());
+//#endif
+    xcb_change_property(connection->xcb_connection(),
+                        XCB_PROP_MODE_REPLACE,
+                        group_leader,
+                        connection->atom(QXcbAtom::WM_CLIENT_LEADER),
+                        XCB_ATOM_WINDOW,
+                        32,
+                        1,
+                        &group_leader);
+
+#if !defined(QT_NO_SESSIONMANAGER) && defined(XCB_USE_SM)
+    // If we are session managed, inform the window manager about it
+    QByteArray session = qGuiApp->sessionId().toLatin1();
+    if (!session.isEmpty()) {
+        xcb_change_property(connection->xcb_connection(),
+                            XCB_PROP_MODE_REPLACE,
+                            group_leader,
+                            connection->atom(QXcbAtom::SM_CLIENT_ID),
+                            XCB_ATOM_STRING,
+                            8,
+                            session.length(),
+                            session.constData());
+    }
+#endif
+
+    // 将group leader的group leader设置为client leader
+    setWindowGroup(group_leader, connection->clientLeader());
+
+    return group_leader;
+}
+
+void Utility::destoryGroupWindow(quint32 groupLeader)
+{
+    xcb_destroy_window(DPlatformIntegration::xcbConnection()->xcb_connection(), groupLeader);
+}
+
+void Utility::setWindowGroup(quint32 window, quint32 groupLeader)
+{
+    window = getNativeTopLevelWindow(window);
+
+    QXcbConnection *connection = DPlatformIntegration::xcbConnection();
+
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_hints_unchecked(connection->xcb_connection(), window);
+    xcb_icccm_wm_hints_t hints;
+    xcb_icccm_get_wm_hints_reply(connection->xcb_connection(), cookie, &hints, NULL);
+
+    if (groupLeader > 0) {
+        xcb_icccm_wm_hints_set_window_group(&hints, groupLeader);
+    } else {
+        hints.flags &= (~XCB_ICCCM_WM_HINT_WINDOW_GROUP);
+    }
+
+    xcb_icccm_set_wm_hints(connection->xcb_connection(), window, &hints);
 }
 
 int Utility::XIconifyWindow(void *display, quint32 w, int screen_number)

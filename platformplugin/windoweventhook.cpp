@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2016 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "utility.h"
 #include "dframewindow.h"
 #include "dplatformwindowhelper.h"
+#include "dhighdpi.h"
 
 #define private public
 #define protected public
@@ -40,11 +41,11 @@ DPP_BEGIN_NAMESPACE
 
 PUBLIC_CLASS(QXcbWindow, WindowEventHook);
 
-WindowEventHook::WindowEventHook(QXcbWindow *window, bool useDxcb)
+WindowEventHook::WindowEventHook(QXcbWindow *window, bool redirectContent)
 {
     const Qt::WindowType &type = window->window()->type();
 
-    if (useDxcb) {
+    if (redirectContent) {
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleConfigureNotifyEvent,
                                      this, &WindowEventHook::handleConfigureNotifyEvent);
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleMapNotifyEvent,
@@ -64,10 +65,10 @@ WindowEventHook::WindowEventHook(QXcbWindow *window, bool useDxcb)
 #endif
     }
 
-    QObject::connect(window->window(), &QWindow::destroyed, window->window(), [this, window] {
-        delete this;
-        VtableHook::clearGhostVtable(static_cast<QXcbWindowEventListener*>(window));
-    });
+    if (type == Qt::Window) {
+        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handlePropertyNotifyEvent,
+                                     this, &WindowEventHook::handlePropertyNotifyEvent);
+    }
 }
 
 //#define DND_DEBUG
@@ -112,7 +113,7 @@ void WindowEventHook::handleConfigureNotifyEvent(const xcb_configure_notify_even
     me->QXcbWindow::handleConfigureNotifyEvent(event);
 
     if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
-        helper->m_frameWindow->updateNativeWindowXPixmap(event->width, event->height);
+        helper->m_frameWindow->markXPixmapToDirty(event->width, event->height);
     }
 }
 
@@ -122,8 +123,10 @@ void WindowEventHook::handleMapNotifyEvent(const xcb_map_notify_event_t *event)
 
     me->QXcbWindow::handleMapNotifyEvent(event);
 
-    if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
-        helper->m_frameWindow->updateNativeWindowXPixmap();
+    if (DFrameWindow *frame = qobject_cast<DFrameWindow*>(me->window())) {
+        frame->markXPixmapToDirty();
+    } else if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
+        helper->m_frameWindow->markXPixmapToDirty();
     }
 }
 
@@ -344,6 +347,26 @@ void WindowEventHook::handleFocusOutEvent(const xcb_focus_out_event_t *event)
     xcbWindow->connection()->addPeekFunc(focusInPeeker);
 }
 
+void WindowEventHook::handlePropertyNotifyEvent(const xcb_property_notify_event_t *event)
+{
+    DQXcbWindow *window = reinterpret_cast<DQXcbWindow*>(this->window());
+    QWindow *ww = window->window();
+
+    window->QXcbWindow::handlePropertyNotifyEvent(event);
+
+    if (event->window == window->xcb_window()
+            && event->atom == window->atom(QXcbAtom::_NET_WM_STATE)) {
+        QXcbWindow::NetWmStates states = window->netWmStates();
+
+        ww->setProperty(netWmStates, (int)states);
+
+        if (const DFrameWindow *frame = qobject_cast<DFrameWindow*>(ww)) {
+            if (frame->m_contentWindow)
+                frame->m_contentWindow->setProperty(netWmStates, (int)states);
+        }
+    }
+}
+
 #ifdef XCB_USE_XINPUT22
 static Qt::KeyboardModifiers translateModifiers(const QXcbKeyboard::_mod_masks &rmod_masks, int s)
 {
@@ -410,16 +433,22 @@ void WindowEventHook::handleXIEnterLeave(xcb_ge_event_t *event)
 
                 if (buttons.testFlag(b)) {
                     if (!isSet) {
-                        QGuiApplicationPrivate::lastCursorPosition = QPointF(root_x, root_y);
+                        QGuiApplicationPrivate::lastCursorPosition = DHighDpi::fromNativePixels(QPointF(root_x, root_y), me->window());
                         me->handleButtonReleaseEvent(event_x, event_y, root_x, root_y,
-                                                     0, modifiers, ev->time,
-                                                     Qt::MouseEventSynthesizedBySystem);
+                                                     0, modifiers, ev->time
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+                                                     , QEvent::MouseButtonRelease
+#endif
+                                                     );
                     }
                 } else if (isSet) {
-                    QGuiApplicationPrivate::lastCursorPosition = QPointF(root_x, root_y);
+                    QGuiApplicationPrivate::lastCursorPosition = DHighDpi::fromNativePixels(QPointF(root_x, root_y), me->window());
                     me->handleButtonPressEvent(event_x, event_y, root_x, root_y,
-                                               0, modifiers, ev->time,
-                                               Qt::MouseEventSynthesizedBySystem);
+                                               0, modifiers, ev->time
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+                                               , QEvent::MouseButtonPress
+#endif
+                                               );
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2017 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,15 +123,17 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
     if (isUseDxcb) {
         QSurfaceFormat format = window->format();
 
-//        const int oldAlpha = format.alphaBufferSize();
-//        const int newAlpha = 8;
+        const int oldAlpha = format.alphaBufferSize();
+        const int newAlpha = 8;
 
         window->setProperty("_d_dxcb_TransparentBackground", format.hasAlpha());
 
-//        if (oldAlpha != newAlpha) {
-//            format.setAlphaBufferSize(newAlpha);
-//            window->setFormat(format);
-//        }
+        if (!DPlatformWindowHelper::windowRedirectContent(window)) {
+            if (oldAlpha != newAlpha) {
+                format.setAlphaBufferSize(newAlpha);
+                window->setFormat(format);
+            }
+        }
     }
 
     QPlatformWindow *w = DPlatformIntegrationParent::createPlatformWindow(window);
@@ -146,7 +148,10 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
     }
 
 #ifdef Q_OS_LINUX
-    Q_UNUSED(new WindowEventHook(xw, isUseDxcb))
+    const DFrameWindow *frame_window = qobject_cast<DFrameWindow*>(window);
+    bool rc = frame_window ? DPlatformWindowHelper::windowRedirectContent(frame_window->m_contentWindow)
+                           : DPlatformWindowHelper::windowRedirectContent(window);
+    Q_UNUSED(new WindowEventHook(xw, rc))
 #endif
 
 //    QWindow *tp_for_window = window->transientParent();
@@ -158,6 +163,17 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
 //        }
 //    }
 
+    if (window->type() != Qt::Desktop && !frame_window) {
+        if (window->property(groupLeader).isValid()) {
+            Utility::setWindowGroup(w->winId(), qvariant_cast<quint32>(window->property(groupLeader)));
+        }
+#ifdef Q_OS_LINUX
+        else {
+            Utility::setWindowGroup(w->winId(), xcbConnection()->clientLeader());
+        }
+#endif
+    }
+
     return xw;
 }
 
@@ -167,9 +183,15 @@ QPlatformBackingStore *DPlatformIntegration::createPlatformBackingStore(QWindow 
 
     QPlatformBackingStore *store = DPlatformIntegrationParent::createPlatformBackingStore(window);
 
-//    if (window->type() != Qt::Desktop && window->property(useDxcb).toBool())
+    if (window->type() != Qt::Desktop && window->property(useDxcb).toBool())
 #ifdef USE_NEW_IMPLEMENTING
-//        m_storeHelper->addBackingStore(store);
+        if (!DPlatformWindowHelper::windowRedirectContent(window)) {
+            m_storeHelper->addBackingStore(store);
+
+            if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(window->handle())) {
+                helper->m_frameWindow->m_contentBackingStore = store;
+            }
+        }
 #else
         return new DPlatformBackingStore(window, static_cast<QXcbBackingStore*>(store));
 #endif
@@ -540,6 +562,9 @@ static void overrideChangeCursor(QPlatformCursor *cursorHandle, QCursor * cursor
         // No X11 cursor control when there is no widget under the cursor
         return;
 
+    if (widget->property(disableOverrideCursor).toBool())
+        return;
+
     // set cursor size scale
     static bool xcursrSizeIsSet = qEnvironmentVariableIsSet("XCURSOR_SIZE");
 
@@ -558,8 +583,11 @@ static void overrideChangeCursor(QPlatformCursor *cursorHandle, QCursor * cursor
         c = it.value();
 #if QT_VERSION < QT_VERSION_CHECK(5, 7, 1)
         w->setCursor(c);
-#else
+#elif QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
         w->setCursor(c, false);
+#else
+        xcb_change_window_attributes(DPlatformIntegration::xcbConnection()->xcb_connection(), w->xcb_window(), XCB_CW_CURSOR, &c);
+        xcb_flush(DPlatformIntegration::xcbConnection()->xcb_connection());
 #endif
     }
 
@@ -664,16 +692,19 @@ void DPlatformIntegration::initialize()
     }
 
     QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &hookScreenGetWindow);
-    QObject::connect(qApp, &QGuiApplication::screenRemoved, qApp, [] (QScreen *screen) {
-        if (screen->handle())
-            VtableHook::clearGhostVtable(screen->handle());
-    });
 }
 
 bool DPlatformIntegration::isWindowBlockedHandle(QWindow *window, QWindow **blockingWindow)
 {
     if (DFrameWindow *frame = qobject_cast<DFrameWindow*>(window)) {
-        return VtableHook::callOriginalFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked, frame->m_contentWindow, blockingWindow);
+        bool blocked = VtableHook::callOriginalFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked, frame->m_contentWindow, blockingWindow);
+
+        // NOTE(zccrs): 将内容窗口的blocked状态转移到frame窗口，否则会被QXcbWindow::relayFocusToModalWindow重复调用requestActivate而引起死循环
+        if (blockingWindow && frame->m_contentWindow.data() == *blockingWindow) {
+            *blockingWindow = window;
+        }
+
+        return blocked;
     }
 
     return VtableHook::callOriginalFun(qApp->d_func(), &QGuiApplicationPrivate::isWindowBlocked, window, blockingWindow);

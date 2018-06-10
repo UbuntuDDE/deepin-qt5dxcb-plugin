@@ -1,4 +1,148 @@
-<a name=""></a>
+<a name="1.1.8.8"></a>
+## 1.1.8.8 (2018-06-07)
+
+
+#### Bug Fixes
+
+*   revert the fix commit of QTBUG-53993 only in BypassWindowManagerHint window ([22ea6fc9](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/22ea6fc9b25e4f37df48d5b70b363cd29efe4f0f))
+
+
+
+<a name="1.1.8.7"></a>
+## 1.1.8.7 (2018-06-07)
+
+
+#### Bug Fixes
+
+*   can not get focus by mouse press on BypassWindowManagerHint window ([b7799256](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/b779925639c51b9024023797c536bc7bd61805ec))
+*   build failures under Qt 5.11 ([3214457d](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/3214457d622b9ecbea2bcd11d8a3473aac3c0a5a))
+
+
+
+<a name="1.1.8.6"></a>
+## 1.1.8.6 (2018-05-11)
+
+
+#### Bug Fixes
+
+*   build failed on Qt 5.10.0 ([f6c86693](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/f6c866935f7833b60b0701360473762158d6a11f))
+
+
+
+<a name="1.1.8.5"></a>
+## 1.1.8.5 (2018-05-04)
+
+
+#### Features
+
+*   support window group leader ([398cf704](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/398cf704776d69b6e0c4b1d03827b91628cd9431))
+*   support Qt 5.9.4 ([8ada8d39](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/8ada8d39b33a4f66183549286132b19d9e352f84))
+*   support Qt 5.10.1 ([e476353b](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/e476353bbcf68eb6474d837471a4d202fa76737a))
+*   add "inputEventSourceDevice" native platform function ([541fbc79](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/541fbc79d93b68cb3067ffba766f16d1e6583279))
+*   listen the DForeignPlatformWindow events ([09650c80](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/09650c8024fa0cb626ee86d7f9f5df4cdc4fe390))
+
+#### Bug Fixes
+
+*   frame window radius is wrong when the window state form Qt::WindowMaximized to Qt::WindowNoState ([ea9b1215](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/ea9b12150fa2c4f4f494345d9210595c9b578432))
+*   crash in DPlatformWindowHelper::eventFilter if the event is DragLeave type ([5448b26f](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/5448b26f118470dec442f86b892649719030b273))
+*   rm .qmake.conf ([3ae6fd16](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/3ae6fd160f44a59f808cf5dac4f1817a4cb59bf8))
+*   can not ignore window close event ([a1d505e2](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/a1d505e2954be573a322238a312f24508a5a555a))
+*   the isWindowBlockedHandle function is stuck in an infinite loop ([7ce08107](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/7ce081076605db4e9cf9d2be5b2ae37adce1afff))
+
+
+
+<a name="1.1.8.4"></a>
+##  (2018-03-22)
+
+
+#### Bug Fixes
+
+*   window setting Qt::WindowTransparentForInput flag is invalid ([475bc708](1.1.8.4/commit/475bc70832591da3ef9ca06ccbd328c033baefa3))
+*   clear the window blur areas when the window unmap ([482d26e1](1.1.8.4/commit/482d26e1854d27c055d97c5e223f29991f8efccd))
+
+
+
+<a name="1.1.8.3"></a>
+##  (2018-03-16)
+
+
+#### Bug Fixes
+
+*   crash in DPlatformBackingStoreHelper::flush ([38d9dad0](1.1.8.3/commit/38d9dad077e127a64fbcf847a9c7cc1e31541473))
+
+
+
+<a name="1.1.8.2"></a>
+##  (2018-03-15)
+
+
+#### Bug Fixes
+
+*   dframewindow timerEvent ([5afacaec](1.1.8.2/commit/5afacaec9839c898eebf4f120c9e44a9bae098b3))
+*   request active window is invalid ([ea8e7a13](1.1.8.2/commit/ea8e7a132aa603b9cf88b64d7fbc78d1c91249a3))
+*   window not receive Leave event when the window is covered by other windows ([2348e1c3](1.1.8.2/commit/2348e1c3ea1138850181a84571437690f48c9a25))
+
+
+
+<a name="1.1.8.1"></a>
+##  1.1.8.1 (2018-03-08)
+
+
+#### Features
+
+*   support disable change window cursor ([0fbb6f1c](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/0fbb6f1cd56d8514f512f533893f115af93cca78))
+
+#### Bug Fixes
+
+*   crash on handlePropertyNotifyEvent ([ebb2b1a3](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/ebb2b1a32f53b2a6d888835ada88a4c98d5de537))
+*   window can not maximize ([da161585](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/da161585468526e8a821933d08e97b94c76d3e36))
+*   no leave event when window hide ([a2bd2498](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/a2bd24989a077dc058928bf58d0aefea4dc98f13))
+*   the window "_d_netWmStates" property is invalid ([f48df4c1](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/f48df4c139cc058cd6a8ac05d10245cdba715121))
+*   window fillet anti-aliasing ([ed29cca5](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/ed29cca57544f2678bbc594fd7d7203d0d9ed933))
+*   blurred window sometimes does not take effect ([3aa09aa3](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/3aa09aa3502e422395cc60acaa2797a15f0105c5))
+*   carsh on arm platform ([92d20f72](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/92d20f720331542891b04a738e42bc586064a322))
+*   optimize the effect of the window fillet ([40d298a7](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/40d298a7beeb7cad7e2f6bb5cadcfc79b8fdbbc2))
+*   window exists property on non-kwin windows _KDE_NET_WM_BLUR_BEHIND_REGION ([4cc89fcc](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/4cc89fccb8b7791bb349bdbfd0c08f744ab143e6))
+
+
+
+<a name="1.1.8"></a>
+## 1.1.8 (2018-02-09)
+
+
+#### Bug Fixes
+
+*   shadow image not repaint ([8cde9879](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/8cde9879cc74944c111e23a7c99634b0ab545e15))
+*   content window no clip ([359647c3](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/359647c39c6220ecb6c44471b953d9bd248ce392))
+
+
+
+<a name="1.1.7"></a>
+##  1.1.7 (2018-02-07)
+
+
+#### Features
+
+*   set window radius to 0 when window maximzed ([35ef919c](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/35ef919cb5dd6a50deff1e2f466bb141a4fc3424))
+
+#### Bug Fixes
+
+*   crash in DPlatformBackingStoreHelper::flush ([dbab1dc3](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/dbab1dc31e6a3129d2b688ede676679102c099f8))
+*   update copyright year ([422c0d2d](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/422c0d2d53a1452ff9b80f31c166a38db95daa38))
+*   shadow image size is wrong ([e537bcea](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/e537bceab205b45f4f7dd5080213ab33ec0bd5bd))
+*   window radius not visible ([671b8894](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/671b8894667877e0b263234d2e91edecdcafab75))
+*   window can not get focus on Qt 5.9+ ([3c0a44bf](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/3c0a44bf9f8522ad820287d28d7b49bbeea32350))
+*   QGuiApplicationPrivate::lastCursorPosition on hiDPI window ([08755140](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/0875514090cf19e8129f1c6f08a42ac8c219bb3c))
+*   remove debug output in DPlatformBackingStoreHelper::flush ([c68032d9](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/c68032d9cfe0e4e2fc6ef508908f53eec1f2a704))
+*   can not resize window by bottom/right ([e4c58d76](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/e4c58d767d6e5b9fdd8805cec2449d3ddb2b5e0a))
+*   can not reisze window on openbox ([218df1e2](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/218df1e28708dbea9926eb0f94896d959744f7c3))
+*   content window position ([2439d675](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/2439d6753fdd3c6449b43c844f4191d0b60aa12b))
+*   set miniumu/maximum size inoperative for window ([0ad7e599](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/0ad7e59901db5d167227a6026623ffae678dab02))
+*   crash at VtableHook::overrideVfptrFun ([1a8e03cf](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/1a8e03cfb8574ac8df2e1f406b12568307943af1))
+
+
+
+<a name="1.1.6"></a>
 ##  1.1.6 (2017-12-28)
 
 

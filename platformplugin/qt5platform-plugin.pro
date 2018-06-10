@@ -4,6 +4,13 @@
 #
 #-------------------------------------------------
 
+!isEqual(QMAKE_HOST.arch, x86_64):!isEqual(QMAKE_HOST.arch, i386):!isEqual(QMAKE_HOST.arch, i686) {
+    # 在非x86架构的cpu下降低编译器的优化等级
+    # 编译器优化可能会导致虚函数调用不通过虚表
+    QMAKE_CXXFLAGS_RELEASE -= $$QMAKE_CFLAGS_OPTIMIZE
+    QMAKE_CXXFLAGS_RELEASE += -O1
+}
+
 PLUGIN_TYPE = platforms
 PLUGIN_CLASS_NAME = DXcbIntegrationPlugin
 !equals(TARGET, $$QT_DEFAULT_QPA_PLUGIN): PLUGIN_EXTENDS = -
@@ -23,7 +30,14 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 TEMPLATE = lib
-VERSION = $$QT_VERSION
+
+isEmpty(VERSION) {
+    isEmpty(VERSION): VERSION = $$system(git describe --tags --abbrev=0)
+    VERSION = $$replace(VERSION, [^0-9.],)
+    isEmpty(VERSION): VERSION = 1.1.8.8
+}
+
+DEFINES += DXCB_VERSION=\\\"$$VERSION\\\"
 
 linux: include($$PWD/linux.pri)
 windows: include($$PWD/windows.pri)
@@ -34,7 +48,8 @@ SOURCES += \
     $$PWD/main.cpp \
     $$PWD/dplatformintegration.cpp \
     $$PWD/vtablehook.cpp \
-    $$PWD/dplatformnativeinterfacehook.cpp
+    $$PWD/dplatformnativeinterfacehook.cpp \
+    dhighdpi.cpp
 
 HEADERS += \
     $$PWD/dplatformintegration.h \
@@ -43,7 +58,8 @@ HEADERS += \
     $$PWD/global.h \
     $$PWD/dplatformnativeinterfacehook.h \
     $$PWD/dforeignplatformwindow.h \
-    $$PWD/dwmsupport.h
+    $$PWD/dwmsupport.h \
+    dhighdpi.h
 
 DISTFILES += \
     $$PWD/dpp.json

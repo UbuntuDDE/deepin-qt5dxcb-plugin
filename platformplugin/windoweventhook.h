@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 ~ 2017 Deepin Technology Co., Ltd.
+ * Copyright (C) 2016 ~ 2018 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ DPP_BEGIN_NAMESPACE
 class WindowEventHook
 {
 public:
-    WindowEventHook(QXcbWindow *window, bool useDxcb);
+    WindowEventHook(QXcbWindow *window, bool redirectContent);
 
     QXcbWindow *window() const
     { return static_cast<QXcbWindow*>(reinterpret_cast<QXcbWindowEventListener*>(const_cast<WindowEventHook*>(this)));}
@@ -38,6 +38,7 @@ public:
     void handleClientMessageEvent(const xcb_client_message_event_t *event);
     void handleFocusInEvent(const xcb_focus_in_event_t *event);
     void handleFocusOutEvent(const xcb_focus_out_event_t *event);
+    void handlePropertyNotifyEvent(const xcb_property_notify_event_t *event);
 #ifdef XCB_USE_XINPUT22
     void handleXIEnterLeave(xcb_ge_event_t *event);
 #endif
