@@ -1,7 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: qt5dxcb-plugin
 Source: https://github.com/linuxdeepin/qt5dxcb-plugin
-Files-Excluded: platformplugin/libqt5xcbqpa-dev/*
 
 Files: *
 Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>

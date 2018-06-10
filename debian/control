@@ -1,9 +1,10 @@
 Source: deepin-qt5dxcb-plugin
 Section: libs
 Priority: optional
-Maintainer: Debian Deepin Packaging Team <team+pkg-deepin@tracker.debian.org>
+Maintainer: Debian Deepin Packaging Team <pkg-deepin-devel@lists.alioth.debian.org>
 Uploaders:
  Boyuan Yang <073plan@gmail.com>,
+ Yanhao Mo <yanhaocs@gmail.com>,
 Build-Depends:
  debhelper (>= 11~),
  libcairo2-dev,
