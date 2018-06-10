@@ -1,3 +1,24 @@
+<a name="1.1.8.8"></a>
+## 1.1.8.8 (2018-06-07)
+
+
+#### Bug Fixes
+
+*   revert the fix commit of QTBUG-53993 only in BypassWindowManagerHint window ([22ea6fc9](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/22ea6fc9b25e4f37df48d5b70b363cd29efe4f0f))
+
+
+
+<a name="1.1.8.7"></a>
+## 1.1.8.7 (2018-06-07)
+
+
+#### Bug Fixes
+
+*   can not get focus by mouse press on BypassWindowManagerHint window ([b7799256](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/b779925639c51b9024023797c536bc7bd61805ec))
+*   build failures under Qt 5.11 ([3214457d](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/3214457d622b9ecbea2bcd11d8a3473aac3c0a5a))
+
+
+
 <a name="1.1.8.6"></a>
 ## 1.1.8.6 (2018-05-11)
 
