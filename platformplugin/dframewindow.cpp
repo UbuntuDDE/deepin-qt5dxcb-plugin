@@ -137,9 +137,6 @@ DFrameWindow::DFrameWindow(QWindow *content)
     m_startAnimationTimer.setSingleShot(true);
     m_startAnimationTimer.setInterval(300);
 
-    m_updateShadowTimer.setInterval(100);
-    m_updateShadowTimer.setSingleShot(true);
-
     connect(&m_startAnimationTimer, &QTimer::timeout,
             this, &DFrameWindow::startCursorAnimation);
 
@@ -270,10 +267,6 @@ void DFrameWindow::setContentRoundedRect(const QRect &rect, int radius)
     m_contentGeometry = rect.translated(contentOffsetHint());
 
     setContentPath(path, true, radius);
-
-    // force update shadow
-    // m_contentGeometry may changed, but clipPath is not change.
-    updateShadowAsync(0);
 }
 
 QMargins DFrameWindow::contentMarginsHint() const
@@ -383,6 +376,12 @@ void DFrameWindow::mouseMoveEvent(QMouseEvent *event)
             && m_clipPathOfContent.contains(event->pos() - contentOffsetHint())) {
         if (!isEnableSystemMove())
             return;
+
+        if (m_isSystemMoveResizeState) {
+            Utility::updateMousePointForWindowMove(Utility::getNativeTopLevelWindow(winId()));
+
+            return;
+        }
 
         ///TODO: Warning: System move finished no mouse release event
         Utility::startWindowSystemMove(Utility::getNativeTopLevelWindow(winId()));
@@ -857,6 +856,7 @@ void DFrameWindow::updateShadowAsync(int delaye)
         return;
     }
 
+    m_updateShadowTimer.setSingleShot(true);
     m_updateShadowTimer.start(delaye);
 }
 
