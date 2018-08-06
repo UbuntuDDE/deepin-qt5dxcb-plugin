@@ -1,3 +1,9 @@
+deepin-qt5dxcb-plugin (1.1.10-1) unstable; urgency=medium
+
+  * New upstream version 1.1.10
+
+ -- Yanhao Mo <yanhaocs@gmail.com>  Mon, 06 Aug 2018 16:06:33 +0800
+
 deepin-qt5dxcb-plugin (1.1.9.2-1) unstable; urgency=medium
 
   * New upstream version 1.1.9.2
