@@ -64,6 +64,16 @@
 #include <private/qsimpledrag_p.h>
 #undef protected
 #include <qpa/qplatformnativeinterface.h>
+#include <private/qpaintengine_raster_p.h>
+
+class DQPaintEngine : public QPaintEngine
+{
+public:
+    inline void clearFeatures(const QPaintEngine::PaintEngineFeatures &f)
+    {
+        gccaps &= ~f;
+    }
+};
 
 DPP_BEGIN_NAMESPACE
 
@@ -105,6 +115,68 @@ DPlatformIntegration::~DPlatformIntegration()
     delete m_storeHelper;
     delete m_contextHelper;
 #endif
+}
+
+bool DPlatformIntegration::enableDxcb(QWindow *window)
+{
+    qDebug() << __FUNCTION__ << window << window->type() << window->parent();
+
+    if (window->type() == Qt::Desktop)
+        return false;
+
+    QNativeWindow *xw = static_cast<QNativeWindow*>(window->handle());
+
+    if (!xw) {
+        window->setProperty(useDxcb, true);
+
+        return true;
+    }
+
+#ifndef USE_NEW_IMPLEMENTING
+    return false;
+#endif
+
+    if (DPlatformWindowHelper::mapped.value(xw))
+        return true;
+
+    if (xw->isExposed())
+        return false;
+
+    if (!DPlatformWindowHelper::windowRedirectContent(window)) {
+        QPlatformBackingStore *store = reinterpret_cast<QPlatformBackingStore*>(qvariant_cast<quintptr>(window->property("_d_dxcb_BackingStore")));
+
+        if (!store)
+            return false;
+
+        QSurfaceFormat format = window->format();
+
+        const int oldAlpha = format.alphaBufferSize();
+        const int newAlpha = 8;
+
+        if (oldAlpha != newAlpha) {
+            format.setAlphaBufferSize(newAlpha);
+            window->setFormat(format);
+
+            // 由于窗口alpha值的改变，需要重新创建x widnow
+            xw->create();
+        }
+
+        DPlatformWindowHelper *helper = new DPlatformWindowHelper(xw);
+        instance()->m_storeHelper->addBackingStore(store);
+        helper->m_frameWindow->m_contentBackingStore = store;
+    } else {
+        Q_UNUSED(new DPlatformWindowHelper(xw))
+    }
+
+    window->setProperty(useDxcb, true);
+    window->setProperty("_d_dxcb_TransparentBackground", window->format().hasAlpha());
+
+    return true;
+}
+
+bool DPlatformIntegration::isEnableDxcb(const QWindow *window)
+{
+    return window->property(useDxcb).toBool();
 }
 
 QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) const
@@ -185,7 +257,12 @@ QPlatformBackingStore *DPlatformIntegration::createPlatformBackingStore(QWindow 
 
     QPlatformBackingStore *store = DPlatformIntegrationParent::createPlatformBackingStore(window);
 
-    if (window->type() != Qt::Desktop && window->property(useDxcb).toBool())
+    if (window->type() == Qt::Desktop)
+        return store;
+
+    window->setProperty("_d_dxcb_BackingStore", reinterpret_cast<quintptr>(store));
+
+    if (window->property(useDxcb).toBool())
 #ifdef USE_NEW_IMPLEMENTING
         if (!DPlatformWindowHelper::windowRedirectContent(window)) {
             m_storeHelper->addBackingStore(store);
@@ -208,6 +285,55 @@ QPlatformOpenGLContext *DPlatformIntegration::createPlatformOpenGLContext(QOpenG
 //    m_contextHelper->addOpenGLContext(context, p_context);
 
     return p_context;
+}
+
+QPaintEngine *DPlatformIntegration::createImagePaintEngine(QPaintDevice *paintDevice) const
+{
+    static QPaintEngine::PaintEngineFeatures disable_features = QPaintEngine::PaintEngineFeatures(-1);
+
+    if (int(disable_features) < 0) {
+        disable_features = 0;
+
+        QByteArray data = qgetenv("DXCB_PAINTENGINE_DISABLE_FEATURES");
+
+        do {
+            if (!data.isEmpty()) {
+                bool ok = false;
+                disable_features = QPaintEngine::PaintEngineFeatures(data.toInt(&ok, 16));
+
+                if (ok)
+                    break;
+
+                disable_features = 0;
+            }
+
+            QSettings settings(QSettings::IniFormat, QSettings::UserScope, "deepin", "qt-theme");
+
+            settings.setIniCodec("utf-8");
+            settings.beginGroup("Platform");
+
+            bool ok = false;
+
+            disable_features = QPaintEngine::PaintEngineFeatures(settings.value("PaintEngineDisableFeatures").toByteArray().toInt(&ok, 16));
+
+            if (!ok)
+                disable_features = 0;
+        } while (false);
+    }
+
+    QPaintEngine *base_engine = DPlatformIntegrationParent::createImagePaintEngine(paintDevice);
+
+    if (disable_features == 0)
+        return base_engine;
+
+    if (!base_engine)
+        base_engine = new QRasterPaintEngine(paintDevice);
+
+    DQPaintEngine *engine = static_cast<DQPaintEngine*>(base_engine);
+
+    engine->clearFeatures(disable_features);
+
+    return engine;
 }
 
 QStringList DPlatformIntegration::themeNames() const
