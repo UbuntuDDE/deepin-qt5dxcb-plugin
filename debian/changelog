@@ -1,3 +1,10 @@
+deepin-qt5dxcb-plugin (1.1.11-2) unstable; urgency=medium
+
+  * Rebuild with Qt 5.11.2.
+  * Bump Standards-Version to 4.2.1 (no changes needed).
+
+ -- Yanhao Mo <yanhaocs@gmail.com>  Fri, 19 Oct 2018 14:01:51 +0800
+
 deepin-qt5dxcb-plugin (1.1.11-1) unstable; urgency=medium
 
   * New upstream version 1.1.11
