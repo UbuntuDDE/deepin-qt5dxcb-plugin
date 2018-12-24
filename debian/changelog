@@ -1,3 +1,13 @@
+deepin-qt5dxcb-plugin (1.1.20-1) unstable; urgency=medium
+
+  * New upstream release 1.1.20.
+  * debian/control:
+    + Build-depend on debhelper-compat (= 11) instead of using
+      debian/compat file.
+    + Bump Standard-Version to 4.3.0.
+
+ -- Boyuan Yang <byang@debian.org>  Mon, 24 Dec 2018 11:22:40 +0800
+
 deepin-qt5dxcb-plugin (1.1.13-1) unstable; urgency=medium
 
   * New upstream release 1.1.13.
