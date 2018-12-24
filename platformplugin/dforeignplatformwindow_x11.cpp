@@ -48,11 +48,15 @@ enum {
             | XCB_EVENT_MASK_COLOR_MAP_CHANGE | XCB_EVENT_MASK_OWNER_GRAB_BUTTON
 };
 
-DForeignPlatformWindow::DForeignPlatformWindow(QWindow *window)
+DForeignPlatformWindow::DForeignPlatformWindow(QWindow *window, WId winId)
     : QXcbWindow(window)
 {
+    m_window = winId;
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 9, 0)
     // init window id
     QNativeWindow::create();
+#endif
 
     m_dirtyFrameMargins = true;
 
@@ -144,7 +148,11 @@ void DForeignPlatformWindow::handleConfigureNotifyEvent(const xcb_configure_noti
     // will make the comparison later.
     QWindowSystemInterface::handleWindowScreenChanged(window(), newScreen->screen());
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
     if (m_usingSyncProtocol && m_syncState == SyncReceived)
+#else
+    if (connection()->hasXSync() && m_syncState == SyncReceived)
+#endif
         m_syncState = SyncAndConfigureReceived;
 
     m_dirtyFrameMargins = true;
