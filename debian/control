@@ -6,7 +6,7 @@ Uploaders:
  Boyuan Yang <byang@debian.org>,
  Yanhao Mo <yanhaocs@gmail.com>,
 Build-Depends:
- debhelper-compat (= 11),
+ debhelper-compat (= 12),
  libcairo2-dev,
  libdbus-1-dev,
  libdtkcore-dev (>= 2.0.5.2-2~),

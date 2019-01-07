@@ -1,6 +1,13 @@
+deepin-qt5dxcb-plugin (1.1.22-1) unstable; urgency=medium
+
+  * New upstream release 1.1.22.
+  * debian/control: Bump debhelper compat to v12.
+
+ -- Boyuan Yang <byang@debian.org>  Mon, 07 Jan 2019 15:15:13 -0500
+
 deepin-qt5dxcb-plugin (1.1.21-1) unstable; urgency=high
 
-  * New upstream release 1.1.12.
+  * New upstream release 1.1.21.
   * debian/patches: Add patch for Qt 5.11.3 support.
     (Closes: #917540)
 
