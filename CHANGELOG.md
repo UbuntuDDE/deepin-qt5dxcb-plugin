@@ -1,3 +1,89 @@
+<a name="1.2.2"></a>
+## 1.2.2 (2019-05-29)
+
+
+#### Features
+
+*   support the 16bits/30bits image formats ([c50d83ef](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/c50d83efa671780fd91ae73ef86ac31fb5256292))
+
+
+
+<a name="1.2.1"></a>
+## 1.2.1 (2019-05-23)
+
+
+#### Features
+
+*   add new Qt private component for Qt 5.13+ ([796ad523](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/796ad5235fec4ac83b734f2876614fd8eb7b3c2b))
+*   support Qt 15.12.1/15.12.2/15.12.3 ([ee3e4c8a](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/ee3e4c8a965b4e0a7b920ac8bcf8af96ff47f5b2))
+
+#### Bug Fixes
+
+*   It is easy to trigger resize when using the touch screen to move the window ([99e43da8](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/99e43da805ae29d078315dd23683d0277d0bb760))
+*   the window menu cannot hide ([a077611d](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/a077611df0469f498ebec29e566c68d260f10ddb))
+*   the foreign platform window screen is wrong ([6eac7834](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/6eac7834c93d54c9e9cbb18b155d0da1768ddf61))
+
+
+
+<a name="1.2.0"></a>
+## 1.2.0 (2019-05-09)
+
+
+#### Bug Fixes
+
+*   DForeignPlatformWindow have a wrong screen object ([49658492](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/4965849204cc5fa67fb207f136222af3e4f0b2a8))
+*   crash at DForeignPlatformWindow::handleConfigureNotifyEvent ([5ff0224a](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/5ff0224aeafb6ec6fb76c5ad5eb3351f6de883d4))
+
+#### Others
+
+*   correct a typo ([83f8d46c](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/83f8d46c11ac2c3a58a53ec88db08fe7d72eaf8f))
+
+
+
+<a name="1.1.27"></a>
+## 1.1.27 (2019-04-23)
+
+
+#### Bug Fixes
+
+*   window can not get focus at mapped ([42684bc9](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/42684bc9dc937d0c1373d0d4d132391fa2118250))
+*   do not use methods because symbols are not exported ([07eb94cd](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/07eb94cd51ed05e83571c32b233ebf2e48e56700))
+*   compatibility with Qt 5.12+ ([b6355ce1](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/b6355ce160c2ba48df7efb81a96a4a7f6d8923e6))
+
+
+
+<a name="1.1.26.1"></a>
+## 1.1.26.1 (2019-04-22)
+
+
+#### Bug Fixes
+
+*   failed on build(Qt 5.7.x) ([b7a973db](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/b7a973dbd2a6ff086114aff01c9ff33f6e01cb17))
+
+
+
+<a name="1.1.26"></a>
+## 1.1.26 (2019-04-17)
+
+
+#### Bug Fixes
+
+*   Synchronize its screen object only when the native window is called directly on setScreen ([a5749da3](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/a5749da392d77c8b92cf66480b52207af3c7452f))
+*   call QDeepinTheme::updateScaleLogcailDpi when screen added ([d4815e53](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/d4815e5306460133bf4018040d748940e35fa014))
+*   window shadow dislocation on multi-screen and the screens have different device pixel scale ratio ([d8013112](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/d8013112ee4635a5e5d6177321d6fb954246d53b))
+
+
+
+<a name="1.1.25"></a>
+## 1.1.25 (2019-03-27)
+
+
+#### Bug Fixes
+
+*   the window can not move ([2011cb3f](https://github.com/linuxdeepin/qt5dxcb-plugin/commit/2011cb3fb31be1a5be540901a1af5b8c320b71e5))
+
+
+
 <a name="1.1.24"></a>
 ## 1.1.24 (2019-02-26)
 

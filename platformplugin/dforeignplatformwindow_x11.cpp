@@ -24,6 +24,7 @@
 #include "qxcbscreen.h"
 
 #include <QDebug>
+#include <QGuiApplication>
 
 #include <private/qwindow_p.h>
 #include <private/qguiapplication_p.h>
@@ -64,6 +65,13 @@ DForeignPlatformWindow::DForeignPlatformWindow(QWindow *window, WId winId)
 
     init();
     create();
+
+    // 因为此窗口不包含在 QGuiApplication::allWindows() 中，屏幕对象销毁时不会重置它的屏幕为主屏
+    QObject::connect(qApp, &QGuiApplication::screenRemoved, window, [window] (QScreen *screen) {
+        if (screen == window->screen()) {
+            window->setScreen(qApp->primaryScreen());
+        }
+    });
 }
 
 DForeignPlatformWindow::~DForeignPlatformWindow()
@@ -211,6 +219,31 @@ void DForeignPlatformWindow::destroy()
     connection()->removeWindowEventListener(m_window);
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 9, 0)
+QPlatformScreen *DForeignPlatformWindow::screenForGeometry(const QRect &newGeometry) const
+{
+    QPlatformScreen *currentScreen = screen();
+    QPlatformScreen *fallback = currentScreen;
+    // QRect::center can return a value outside the rectangle if it's empty.
+    // Apply mapToGlobal() in case it is a foreign/embedded window.
+    QPoint center = newGeometry.isEmpty() ? newGeometry.topLeft()
+                                          : QPoint(qRound((newGeometry.left() + newGeometry.right()) / 2.0),
+                                                   qRound((newGeometry.top() + newGeometry.bottom()) / 2.0));
+
+    if (!parent() && currentScreen && !currentScreen->geometry().contains(center)) {
+        const auto screens = currentScreen->virtualSiblings();
+        for (QPlatformScreen *screen : screens) {
+            const QRect screenGeometry = screen->geometry();
+            if (screenGeometry.contains(center))
+                return screen;
+            if (screenGeometry.intersects(newGeometry))
+                fallback = screen;
+        }
+    }
+    return fallback;
+}
+#endif
+
 void DForeignPlatformWindow::updateTitle()
 {
     xcb_get_property_reply_t *wm_name =
@@ -334,6 +367,10 @@ void DForeignPlatformWindow::init()
     updateWmClass();
     updateWmDesktop();
     updateProcessId();
+
+    if (QPlatformScreen * qplatformScreen = screenForGeometry(geometry())) {
+        window()->setScreen(qplatformScreen->screen());
+    }
 
 //    m_mapped = Utility::getWindows().contains(m_window);
 //    qt_window_private(window())->visible = m_mapped;

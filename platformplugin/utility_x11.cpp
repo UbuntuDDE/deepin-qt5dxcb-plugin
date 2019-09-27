@@ -208,6 +208,8 @@ void Utility::showWindowSystemMenu(quint32 WId, QPoint globalPos)
     xev.data.data32[1] = globalPos.x();
     xev.data.data32[2] = globalPos.y();
 
+    // ungrab鼠标，防止窗管的菜单窗口无法grab鼠标
+    xcb_ungrab_pointer(QX11Info::connection(), XCB_CURRENT_TIME);
     xcb_send_event(QX11Info::connection(), false, QX11Info::appRootWindow(QX11Info::appScreen()),
                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
                    (const char *)&xev);
@@ -449,24 +451,46 @@ void Utility::clearWindowProperty(quint32 WId, xcb_atom_t propAtom)
     xcb_delete_property_checked(QX11Info::connection(), WId, propAtom);
 }
 
-bool Utility::hasBlurWindow()
+void Utility::setNoTitlebar(quint32 WId, bool on)
 {
-    return  DXcbWMSupport::instance()->hasBlurWindow();
+    quint8 value = on;
+    setWindowProperty(WId, DXcbWMSupport::instance()->_deepin_no_titlebar, XCB_ATOM_CARDINAL, &value, 1, 8);
+
+    // 默认为使用noborder属性的窗口强制打开窗口标题栏
+    xcb_atom_t _deepin_force_decorate = internAtom("_DEEPIN_FORCE_DECORATE", false);
+    if (on) {
+        quint8 value = on;
+        setWindowProperty(WId, _deepin_force_decorate, XCB_ATOM_CARDINAL, &value, 1, 8);
+    } else {
+        clearWindowProperty(WId, _deepin_force_decorate);
+    }
 }
 
-bool Utility::hasComposite()
+bool Utility::setEnableBlurWindow(const quint32 WId, bool enable)
 {
-    return DXcbWMSupport::instance()->hasComposite();
-}
+    if (!DXcbWMSupport::instance()->hasBlurWindow() || !DXcbWMSupport::instance()->isKwin())
+        return false;
 
-QString Utility::windowManagerName()
-{
-    return DXcbWMSupport::instance()->windowManagerName();
+    xcb_atom_t atom = DXcbWMSupport::instance()->_kde_net_wm_blur_rehind_region_atom;
+
+    if (atom == XCB_NONE)
+        return false;
+
+    clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask);
+
+    if (enable) {
+        quint32 value = enable;
+        setWindowProperty(WId, atom, XCB_ATOM_CARDINAL, &value, 1, sizeof(quint32) * 8);
+    } else {
+        clearWindowProperty(WId, atom);
+    }
+
+    return true;
 }
 
 bool Utility::blurWindowBackground(const quint32 WId, const QVector<BlurArea> &areas)
 {
-    if (!hasBlurWindow())
+    if (!DXcbWMSupport::instance()->hasBlurWindow())
         return false;
 
     if (DXcbWMSupport::instance()->isDeepinWM()) {
@@ -508,7 +532,9 @@ bool Utility::blurWindowBackground(const quint32 WId, const QVector<BlurArea> &a
         }
 
         clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask);
-        setWindowProperty(WId, atom, XCB_ATOM_CARDINAL, rects.constData(), rects.size(), sizeof(quint32) * 8);
+
+        if (!areas.isEmpty())
+            setWindowProperty(WId, atom, XCB_ATOM_CARDINAL, rects.constData(), rects.size(), sizeof(quint32) * 8);
     }
 
     return true;
@@ -542,6 +568,11 @@ bool Utility::blurWindowBackgroundByPaths(const quint32 WId, const QList<QPainte
 
         if (atom == XCB_NONE)
             return false;
+
+        if (paths.isEmpty()) {
+            clearWindowProperty(WId, DXcbWMSupport::instance()->_net_wm_deepin_blur_region_mask);
+            return true;
+        }
 
         QVector<quint32> rects;
 
@@ -629,9 +660,19 @@ Utility::QtMotifWmHints Utility::getMotifWmHints(quint32 WId)
     return hints;
 }
 
-void Utility::setMotifWmHints(quint32 WId, const Utility::QtMotifWmHints &hints)
+void Utility::setMotifWmHints(quint32 WId, Utility::QtMotifWmHints hints)
 {
     if (hints.flags != 0l) {
+        // 如果标志为设置了xxx_all标志，则其它标志位的设置无任何意义
+        // 反而会导致窗管忽略xxx_all标志，因此此处重设此标志位
+        if (hints.functions & DXcbWMSupport::MWM_FUNC_ALL) {
+            hints.functions = DXcbWMSupport::MWM_FUNC_ALL;
+        }
+
+        if (hints.decorations & DXcbWMSupport::MWM_DECOR_ALL) {
+            hints.functions = DXcbWMSupport::MWM_DECOR_ALL;
+        }
+
 #ifdef Q_XCB_CALL2
         Q_XCB_CALL2(xcb_change_property(DPlatformIntegration::xcbConnection()->xcb_connection(),
                                         XCB_PROP_MODE_REPLACE,

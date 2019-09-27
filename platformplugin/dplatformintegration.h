@@ -36,6 +36,7 @@ class DPlatformWindowHook;
 class XcbNativeEventFilter;
 class DPlatformBackingStoreHelper;
 class DPlatformOpenGLContextHelper;
+class DXcbXSettings;
 
 class DPlatformIntegration : public DPlatformIntegrationParent
 {
@@ -43,8 +44,18 @@ public:
     DPlatformIntegration(const QStringList &parameters, int &argc, char **argv);
     ~DPlatformIntegration();
 
+    static void setWindowProperty(QWindow *window, const char *name, const QVariant &value);
+
     static bool enableDxcb(QWindow *window);
     static bool isEnableDxcb(const QWindow *window);
+
+    static bool setEnableNoTitlebar(QWindow *window, bool enable);
+    static bool isEnableNoTitlebar(const QWindow *window);
+
+    // Warning: 调用 buildNativeSettings，会导致object的QMetaObject对象被更改
+    // 无法使用QMetaObject::cast，不能使用QObject::findChild等接口查找子类，也不能使用qobject_cast转换对象指针类型
+    static bool buildNativeSettings(QObject *object, quint32 settingWindow);
+    static void clearNativeSettings(quint32 settingWindow);
 
     QPlatformWindow *createPlatformWindow(QWindow *window) const Q_DECL_OVERRIDE;
     QPlatformBackingStore *createPlatformBackingStore(QWindow *window) const Q_DECL_OVERRIDE;
@@ -52,6 +63,7 @@ public:
     QPaintEngine *createImagePaintEngine(QPaintDevice *paintDevice) const override;
 
     QStringList themeNames() const Q_DECL_OVERRIDE;
+    QVariant styleHint(StyleHint hint) const override;
 
     void initialize() Q_DECL_OVERRIDE;
 
@@ -73,8 +85,12 @@ private:
     inline XcbNativeEventFilter *eventFilter()
     { return m_eventFilter;}
 
+    bool enableCursorBlink() const;
+    DXcbXSettings *xSettings(bool onlyExists = false) const;
+
 private:
     XcbNativeEventFilter *m_eventFilter = Q_NULLPTR;
+    DXcbXSettings *m_xsettings = nullptr;
 #endif
 private:
     // handle the DFrameWindow modal blocked state

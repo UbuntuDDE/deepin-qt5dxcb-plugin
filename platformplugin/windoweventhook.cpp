@@ -47,11 +47,12 @@ WindowEventHook::WindowEventHook(QXcbWindow *window, bool redirectContent)
     const Qt::WindowType &type = window->window()->type();
 
     if (redirectContent) {
-        VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleConfigureNotifyEvent,
-                                     this, &WindowEventHook::handleConfigureNotifyEvent);
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleMapNotifyEvent,
                                      this, &WindowEventHook::handleMapNotifyEvent);
     }
+
+    VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleConfigureNotifyEvent,
+                                 this, &WindowEventHook::handleConfigureNotifyEvent);
 
     if (type == Qt::Widget || type == Qt::Window || type == Qt::Dialog) {
         VtableHook::overrideVfptrFun(window, &QXcbWindowEventListener::handleClientMessageEvent,
@@ -112,11 +113,19 @@ xcb_atom_t toXdndAction(const QXcbDrag *drag, Qt::DropAction a)
 void WindowEventHook::handleConfigureNotifyEvent(const xcb_configure_notify_event_t *event)
 {
     QXcbWindow *me = window();
+    DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me);
+
+    if (helper) {
+        QWindowPrivate::get(me->window())->parentWindow = helper->m_frameWindow;
+    }
 
     me->QXcbWindow::handleConfigureNotifyEvent(event);
 
-    if (DPlatformWindowHelper *helper = DPlatformWindowHelper::mapped.value(me)) {
-        helper->m_frameWindow->markXPixmapToDirty(event->width, event->height);
+    if (helper) {
+        QWindowPrivate::get(me->window())->parentWindow = nullptr;
+
+        if (helper->m_frameWindow->redirectContent())
+            helper->m_frameWindow->markXPixmapToDirty(event->width, event->height);
     }
 }
 
@@ -350,6 +359,10 @@ void WindowEventHook::handleFocusInEvent(const xcb_focus_in_event_t *event)
     if (relayFocusToModalWindow(w, xcbWindow->connection()))
         return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+    xcbWindow->connection()->focusInTimer().stop();
+#endif
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
     xcbWindow->connection()->setFocusWindow(w);
 #else
@@ -424,7 +437,11 @@ void WindowEventHook::handleFocusOutEvent(const xcb_focus_out_event_t *event)
     // Do not set the active window to 0 if there is a FocusIn coming.
     // There is however no equivalent for XPutBackEvent so register a
     // callback for QXcbConnection instead.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+    xcbWindow->connection()->focusInTimer().start(400);
+#else
     xcbWindow->connection()->addPeekFunc(focusInPeeker);
+#endif
 }
 
 void WindowEventHook::handlePropertyNotifyEvent(const xcb_property_notify_event_t *event)
