@@ -1,3 +1,10 @@
+deepin-qt5dxcb-plugin (5.0.1-1) unstable; urgency=medium
+
+  * new upstream version 5.0.1.
+  * debian/control: Bump Standards-Version to 4.4.0.
+
+ -- Boyuan Yang <byang@debian.org>  Fri, 27 Sep 2019 15:26:12 -0400
+
 deepin-qt5dxcb-plugin (1.1.24-1) unstable; urgency=medium
 
   * New upstream version 1.1.24
