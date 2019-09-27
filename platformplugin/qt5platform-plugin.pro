@@ -18,6 +18,9 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 
     # Qt >= 5.10
     greaterThan(QT_MINOR_VERSION, 9): QT += edid_support-private
+
+    # Qt >= 5.13
+    greaterThan(QT_MINOR_VERSION, 12): QT += xkbcommon_support-private
 }
 
 TEMPLATE = lib
@@ -40,7 +43,9 @@ SOURCES += \
     $$PWD/dplatformintegration.cpp \
     $$PWD/vtablehook.cpp \
     $$PWD/dplatformnativeinterfacehook.cpp \
-    dhighdpi.cpp
+    dhighdpi.cpp \
+    dnativesettings.cpp \
+    dnotitlebarwindowhelper.cpp
 
 HEADERS += \
     $$PWD/dplatformintegration.h \
@@ -50,7 +55,9 @@ HEADERS += \
     $$PWD/dplatformnativeinterfacehook.h \
     $$PWD/dforeignplatformwindow.h \
     $$PWD/dwmsupport.h \
-    dhighdpi.h
+    dhighdpi.h \
+    dnativesettings.h \
+    dnotitlebarwindowhelper.h
 
 DISTFILES += \
     $$PWD/dpp.json

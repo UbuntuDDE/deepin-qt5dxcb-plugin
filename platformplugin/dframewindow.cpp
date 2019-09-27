@@ -161,6 +161,8 @@ DFrameWindow::~DFrameWindow()
     if (nativeWindowXPixmap != XCB_PIXMAP_NONE)
         xcb_free_pixmap(DPlatformIntegration::xcbConnection()->xcb_connection(), nativeWindowXPixmap);
 #endif
+
+    delete platformBackingStore;
 }
 
 QWindow *DFrameWindow::contentWindow() const
@@ -352,6 +354,11 @@ void DFrameWindow::enableRepaintShadow()
     m_canUpdateShadow = true;
 }
 
+bool DFrameWindow::redirectContent() const
+{
+    return m_redirectContent;
+}
+
 void DFrameWindow::paintEvent(QPaintEvent *)
 {
     if (m_redirectContent) {
@@ -373,16 +380,17 @@ void DFrameWindow::showEvent(QShowEvent *event)
 
 void DFrameWindow::mouseMoveEvent(QMouseEvent *event)
 {
+    // 无论如何，在已进入move resize时都不再进行后面的处理，防止触屏移动窗口时会误触进入到窗口resize状态
+    if (m_isSystemMoveResizeState && qApp->mouseButtons() == Qt::LeftButton) {
+        Utility::updateMousePointForWindowMove(Utility::getNativeTopLevelWindow(winId()));
+
+        return;
+    }
+
     if (event->source() == Qt::MouseEventSynthesizedByQt && qApp->mouseButtons() == Qt::LeftButton
             && m_clipPathOfContent.contains(event->pos() - contentOffsetHint())) {
         if (!isEnableSystemMove())
             return;
-
-        if (m_isSystemMoveResizeState) {
-            Utility::updateMousePointForWindowMove(Utility::getNativeTopLevelWindow(winId()));
-
-            return;
-        }
 
         ///TODO: Warning: System move finished no mouse release event
         Utility::startWindowSystemMove(Utility::getNativeTopLevelWindow(winId()));
@@ -561,9 +569,13 @@ static cairo_format_t cairo_format_from_qimage_format (QImage::Format fmt)
     case QImage::Format_Mono:
     case QImage::Format_MonoLSB:
         return CAIRO_FORMAT_A1;
+    case QImage::Format_RGB16:
+        return CAIRO_FORMAT_RGB16_565;
+    case QImage::Format_RGB30:
+    case QImage::Format_A2RGB30_Premultiplied: // 忽略2 bits的alpha通道
+        return CAIRO_FORMAT_RGB30;
     case QImage::Format_Invalid:
     case QImage::Format_ARGB32:
-    case QImage::Format_RGB16:
     case QImage::Format_ARGB8565_Premultiplied:
     case QImage::Format_RGB666:
     case QImage::Format_ARGB6666_Premultiplied:
@@ -630,13 +642,13 @@ void DFrameWindow::drawShadowTo(QPaintDevice *device)
 
     pa.setCompositionMode(QPainter::CompositionMode_Source);
 
-    if (!disableFrame() && Q_LIKELY(DXcbWMSupport::instance()->hasComposite())
+    if (!disableFrame() && Q_LIKELY(DXcbWMSupport::instance()->hasWindowAlpha())
             && !m_shadowImage.isNull()) {
         pa.drawImage(offset * device_pixel_ratio, m_shadowImage);
     }
 
     if (m_borderWidth > 0 && m_borderColor != Qt::transparent) {
-        if (Q_LIKELY(DXcbWMSupport::instance()->hasComposite())) {
+        if (Q_LIKELY(DXcbWMSupport::instance()->hasWindowAlpha())) {
             pa.setRenderHint(QPainter::Antialiasing);
             pa.fillPath(m_borderPath, m_borderColor);
         } else {
@@ -864,7 +876,7 @@ void DFrameWindow::updateShadowAsync(int delaye)
     m_updateShadowTimer.start(delaye);
 }
 
-void DFrameWindow::updateContentMarginsHint()
+void DFrameWindow::updateContentMarginsHint(bool force)
 {
     QMargins margins;
 
@@ -873,7 +885,7 @@ void DFrameWindow::updateContentMarginsHint()
                        qMax(m_shadowRadius + m_shadowOffset.x(), m_borderWidth),
                        qMax(m_shadowRadius + m_shadowOffset.y(), m_borderWidth));
 
-    if (margins == m_contentMarginsHint)
+    if (!force && margins == m_contentMarginsHint)
         return;
 
     qreal device_pixel_ratio = devicePixelRatio();
@@ -910,7 +922,7 @@ void DFrameWindow::updateMask()
 
     if (disableFrame()) {
         QRegion region(m_contentGeometry * devicePixelRatio());
-        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasComposite(), flags().testFlag(Qt::WindowTransparentForInput));
+        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasWindowAlpha(), flags().testFlag(Qt::WindowTransparentForInput));
 
         return;
     }
@@ -918,7 +930,7 @@ void DFrameWindow::updateMask()
     // Set window clip mask
     int mouse_margins;
 
-    if (DWMSupport::instance()->hasComposite())
+    if (DWMSupport::instance()->hasWindowAlpha())
         mouse_margins = canResize() ? MOUSE_MARGINS : 0;
     else
         mouse_margins = qRound(m_borderWidth * devicePixelRatio());
@@ -938,10 +950,10 @@ void DFrameWindow::updateMask()
             p = path;
         }
 
-        Utility::setShapePath(winId(), p, DWMSupport::instance()->hasComposite(), flags().testFlag(Qt::WindowTransparentForInput));
+        Utility::setShapePath(winId(), p, DWMSupport::instance()->hasWindowAlpha(), flags().testFlag(Qt::WindowTransparentForInput));
     } else {
         QRegion region((m_contentGeometry * devicePixelRatio()).adjusted(-mouse_margins, -mouse_margins, mouse_margins, mouse_margins));
-        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasComposite(), flags().testFlag(Qt::WindowTransparentForInput));
+        Utility::setShapeRectangles(winId(), region, DWMSupport::instance()->hasWindowAlpha(), flags().testFlag(Qt::WindowTransparentForInput));
     }
 
     QPainterPathStroker stroker;
@@ -962,7 +974,7 @@ void DFrameWindow::updateFrameMask()
 //    if (!xw || !xw->wmWindowTypes().testFlag(QXcbWindowFunctions::Dock))
 //        return;
 
-//    if (!m_enableAutoFrameMask || !DWMSupport::instance()->hasComposite())
+//    if (!m_enableAutoFrameMask || !DWMSupport::instance()->hasWindowAlpha())
 //        return;
 
 //    const QRect rect(QRect(QPoint(0, 0), size()));
@@ -1068,6 +1080,11 @@ bool DFrameWindow::disableFrame() const
     return windowState() == Qt::WindowFullScreen
             || windowState() == Qt::WindowMaximized
             || windowState() == Qt::WindowMinimized;
+}
+
+void DFrameWindow::onDevicePixelRatioChanged()
+{
+    updateContentMarginsHint(true);
 }
 
 DPP_END_NAMESPACE

@@ -27,6 +27,7 @@
 
 #include "dplatformintegration.h"
 #include "dxcbwmsupport.h"
+#include "dxcbxsettings.h"
 
 #include <xcb/xfixes.h>
 #include <xcb/damage.h>
@@ -90,6 +91,7 @@ bool XcbNativeEventFilter::nativeEventFilter(const QByteArray &eventType, void *
 #if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
     if (response_type == m_connection->xfixes_first_event + XCB_XFIXES_SELECTION_NOTIFY) {
 #else
+    // cannot use isXFixesType because symbols from QXcbBasicConnection are not exported
     if (response_type == m_connection->m_xfixesFirstEvent + XCB_XFIXES_SELECTION_NOTIFY) {
 #endif
         xcb_xfixes_selection_notify_event_t *xsn = (xcb_xfixes_selection_notify_event_t *)event;
@@ -123,6 +125,8 @@ bool XcbNativeEventFilter::nativeEventFilter(const QByteArray &eventType, void *
         switch (response_type) {
         case XCB_PROPERTY_NOTIFY: {
             xcb_property_notify_event_t *pn = (xcb_property_notify_event_t *)event;
+
+            DXcbXSettings::handlePropertyNotifyEvent(pn);
 
             if (pn->atom == DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_MOTIF_WM_HINTS)) {
                 emit DXcbWMSupport::instance()->windowMotifWMHintsChanged(pn->window);
@@ -185,7 +189,8 @@ bool XcbNativeEventFilter::nativeEventFilter(const QByteArray &eventType, void *
                     return false;
                 }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+// XIQueryDevice 在某些情况(程序放置一夜)会有一定的概率卡住，因此先禁用此逻辑，但会导致鼠标自然滚动设置无法实时生效。目前猜测可能和窗口抓取鼠标/键盘有关，被抓取设备自动休眠后再唤醒时可能会触发此问题.
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0) && false
                 xXIDeviceChangedEvent *xiDCEvent = reinterpret_cast<xXIDeviceChangedEvent *>(xiEvent);
                 QHash<int, QXcbConnection::ScrollingDevice>::iterator device = xcb_connect->m_scrollingDevices.find(xiDCEvent->sourceid);
 
@@ -225,7 +230,41 @@ bool XcbNativeEventFilter::nativeEventFilter(const QByteArray &eventType, void *
             break;
         }
 #endif
-        default: break;
+        case XCB_CLIENT_MESSAGE: {
+            xcb_client_message_event_t *ev = reinterpret_cast<xcb_client_message_event_t*>(event);
+
+            if (DXcbXSettings::handleClientMessageEvent(ev)) {
+                return true;
+            }
+            break;
+        }
+        default:
+            static auto updateScaleLogcailDpi = qApp->property("_d_updateScaleLogcailDpi").toULongLong();
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+            if (updateScaleLogcailDpi && DPlatformIntegration::xcbConnection()->has_randr_extension
+                    && response_type == DPlatformIntegration::xcbConnection()->xrandr_first_event + XCB_RANDR_NOTIFY) {
+#else
+            // cannot use isXRandrType because symbols from QXcbBasicConnection are not exported
+            if (updateScaleLogcailDpi && DPlatformIntegration::xcbConnection()->hasXRender()
+                    && response_type == DPlatformIntegration::xcbConnection()->m_xrandrFirstEvent + XCB_RANDR_NOTIFY) {
+#endif
+                xcb_randr_notify_event_t *e = reinterpret_cast<xcb_randr_notify_event_t *>(event);
+                xcb_randr_output_change_t output = e->u.oc;
+
+                if (e->subCode == XCB_RANDR_NOTIFY_OUTPUT_CHANGE) {
+                    QXcbScreen *screen = DPlatformIntegration::xcbConnection()->findScreenForOutput(output.window, output.output);
+
+                    if (!screen && output.connection == XCB_RANDR_CONNECTION_CONNECTED
+                            && output.crtc != XCB_NONE && output.mode != XCB_NONE) {
+                        DPlatformIntegration::xcbConnection()->updateScreens(e);
+                        // 通知deepin platform插件重设缩放后的dpi值
+                        reinterpret_cast<void(*)()>(updateScaleLogcailDpi)();
+
+                        return true;
+                    }
+                }
+            }
+            break;
         }
     }
 

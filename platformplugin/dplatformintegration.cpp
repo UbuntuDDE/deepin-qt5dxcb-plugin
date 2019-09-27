@@ -19,6 +19,9 @@
 #include "global.h"
 #include "dforeignplatformwindow.h"
 #include "vtablehook.h"
+#include "dwmsupport.h"
+#include "dnotitlebarwindowhelper.h"
+#include "dnativesettings.h"
 
 #ifdef USE_NEW_IMPLEMENTING
 #include "dplatformwindowhelper.h"
@@ -39,6 +42,7 @@
 #include "windoweventhook.h"
 #include "xcbnativeeventfilter.h"
 #include "dplatformnativeinterfacehook.h"
+#include "dxcbxsettings.h"
 
 #include "qxcbscreen.h"
 #include "qxcbbackingstore.h"
@@ -58,6 +62,7 @@
 #include <QGuiApplication>
 #include <QLibrary>
 #include <QDrag>
+#include <QStyleHints>
 
 #include <private/qguiapplication_p.h>
 #define protected public
@@ -65,6 +70,11 @@
 #undef protected
 #include <qpa/qplatformnativeinterface.h>
 #include <private/qpaintengine_raster_p.h>
+
+// https://www.freedesktop.org/wiki/Specifications/XSettingsRegistry/
+#define XSETTINGS_CURSOR_BLINK QByteArrayLiteral("Net/CursorBlink")
+#define XSETTINGS_CURSOR_BLINK_TIME QByteArrayLiteral("Net/CursorBlinkTime")
+#define XSETTINGS_DOUBLE_CLICK_TIME QByteArrayLiteral("Net/DoubleClickTime")
 
 class DQPaintEngine : public QPaintEngine
 {
@@ -115,6 +125,15 @@ DPlatformIntegration::~DPlatformIntegration()
     delete m_storeHelper;
     delete m_contextHelper;
 #endif
+}
+
+void DPlatformIntegration::setWindowProperty(QWindow *window, const char *name, const QVariant &value)
+{
+    if (isEnableNoTitlebar(window)) {
+        DNoTitlebarWindowHelper::setWindowProperty(window, name, value);
+    } else if (isEnableDxcb(window)) {
+        DPlatformWindowHelper::setWindowProperty(window, name, value);
+    }
 }
 
 bool DPlatformIntegration::enableDxcb(QWindow *window)
@@ -179,6 +198,67 @@ bool DPlatformIntegration::isEnableDxcb(const QWindow *window)
     return window->property(useDxcb).toBool();
 }
 
+bool DPlatformIntegration::setEnableNoTitlebar(QWindow *window, bool enable)
+{
+    if (enable && DNoTitlebarWindowHelper::mapped.value(window))
+        return true;
+
+    qDebug() << __FUNCTION__ << enable << window << window->type() << window->parent();
+
+    if (enable) {
+        if (window->type() == Qt::Desktop)
+            return false;
+
+        if (!DWMSupport::instance()->hasNoTitlebar())
+            return false;
+
+        QNativeWindow *xw = static_cast<QNativeWindow*>(window->handle());
+        window->setProperty(noTitlebar, true);
+
+        if (!xw) {
+            return true;
+        }
+
+        Utility::setNoTitlebar(xw->winId(), true);
+        // 跟随窗口被销毁
+        Q_UNUSED(new DNoTitlebarWindowHelper(window, xw->winId()))
+    } else {
+        if (auto helper = DNoTitlebarWindowHelper::mapped.value(window)) {
+            Utility::setNoTitlebar(window->winId(), false);
+            helper->deleteLater();
+        }
+
+        window->setProperty(noTitlebar, QVariant());
+    }
+
+    return true;
+}
+
+bool DPlatformIntegration::isEnableNoTitlebar(const QWindow *window)
+{
+    return window->property(noTitlebar).toBool();
+}
+
+bool DPlatformIntegration::buildNativeSettings(QObject *object, quint32 settingWindow)
+{
+    // 跟随object销毁
+    auto settings = new DNativeSettings(object, settingWindow);
+
+    if (!settings->isValid()) {
+        delete settings;
+        return false;
+    }
+
+    return true;
+}
+
+void DPlatformIntegration::clearNativeSettings(quint32 settingWindow)
+{
+#ifdef Q_OS_LINUX
+    DXcbXSettings::clearSettings(settingWindow);
+#endif
+}
+
 QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) const
 {
     qDebug() << __FUNCTION__ << window << window->type() << window->parent();
@@ -194,6 +274,24 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
         if (win_id > 0) {
             return new DForeignPlatformWindow(window, win_id);
         }
+    }
+
+    bool isNoTitlebar = window->type() != Qt::Desktop && window->property(noTitlebar).toBool();
+
+    if (isNoTitlebar && DWMSupport::instance()->hasNoTitlebar()) {
+        // 销毁旧的helper对象, 此处不用将mapped的值移除，后面会被覆盖
+        if (DNoTitlebarWindowHelper *helper = DNoTitlebarWindowHelper::mapped.value(window)) {
+            helper->deleteLater();
+        }
+
+        QPlatformWindow *w = DPlatformIntegrationParent::createPlatformWindow(window);
+        Utility::setNoTitlebar(w->winId(), true);
+        // 跟随窗口被销毁
+        Q_UNUSED(new DNoTitlebarWindowHelper(window, w->winId()))
+#ifdef Q_OS_LINUX
+        Q_UNUSED(new WindowEventHook(static_cast<QNativeWindow*>(w), false))
+#endif
+        return w;
     }
 
     bool isUseDxcb = window->type() != Qt::Desktop && window->property(useDxcb).toBool();
@@ -227,8 +325,13 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
 
 #ifdef Q_OS_LINUX
     const DFrameWindow *frame_window = qobject_cast<DFrameWindow*>(window);
-    bool rc = frame_window ? DPlatformWindowHelper::windowRedirectContent(frame_window->m_contentWindow)
-                           : DPlatformWindowHelper::windowRedirectContent(window);
+    bool rc = false;
+
+    if (isUseDxcb) {
+        rc = frame_window ? DPlatformWindowHelper::windowRedirectContent(frame_window->m_contentWindow)
+                          : DPlatformWindowHelper::windowRedirectContent(window);
+    }
+
     Q_UNUSED(new WindowEventHook(xw, rc))
 #endif
 
@@ -347,6 +450,33 @@ QStringList DPlatformIntegration::themeNames() const
     list.prepend("deepin");
 
     return list;
+}
+
+#define GET_VALID_XSETTINGS(key) { \
+    auto value = xSettings()->setting(key); \
+    if (value.isValid()) return value; \
+}
+
+QVariant DPlatformIntegration::styleHint(QPlatformIntegration::StyleHint hint) const
+{
+#ifdef Q_OS_LINUX
+    switch ((int)hint) {
+    case CursorFlashTime:
+        if (enableCursorBlink()) {
+            GET_VALID_XSETTINGS(XSETTINGS_CURSOR_BLINK_TIME);
+            break;
+        } else {
+            return 0;
+        }
+    case MouseDoubleClickInterval:
+        GET_VALID_XSETTINGS(XSETTINGS_DOUBLE_CLICK_TIME);
+        break;
+    default:
+        break;
+    }
+#endif
+
+    return DPlatformIntegrationParent::styleHint(hint);
 }
 
 #ifdef Q_OS_LINUX
@@ -669,7 +799,7 @@ static xcb_cursor_t overrideCreateFontCursor(QXcbCursor *xcb_cursor, QCursor *c,
     // Non-standard X11 cursors are created from bitmaps
     cursor = overrideCreateNonStandardCursor(xcb_cursor, cshape, window);
 
-    // Create a glpyh cursor if everything else failed
+    // Create a glyph cursor if everything else failed
     if (!cursor && cursorId) {
         cursor = xcb_generate_id(conn);
         xcb_create_glyph_cursor(conn, cursor, cursorFont, cursorFont,
@@ -852,6 +982,51 @@ void DPlatformIntegration::initialize()
 
     QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &hookScreenGetWindow);
 }
+
+#ifdef Q_OS_LINUX
+static void onXSettingsChanged(QXcbVirtualDesktop *screen, const QByteArray &name, const QVariant &property, void *handle)
+{
+    Q_UNUSED(screen)
+    Q_UNUSED(property)
+    Q_UNUSED(name)
+
+    if (handle == reinterpret_cast<void*>(QPlatformIntegration::CursorFlashTime)) {
+        // 由于QStyleHints中的属性值可能已经被自定义，因此不应该使用property中的值
+        // 此处只表示 QStyleHints 的 cursorFlashTime 属性可能变了
+        Q_EMIT qGuiApp->styleHints()->cursorFlashTimeChanged(qGuiApp->styleHints()->cursorFlashTime());
+    }
+}
+
+bool DPlatformIntegration::enableCursorBlink() const
+{
+    auto value = xSettings()->setting(XSETTINGS_CURSOR_BLINK);
+    bool ok = false;
+    int enable = value.toInt(&ok);
+
+    return !ok || enable;
+}
+
+DXcbXSettings *DPlatformIntegration::xSettings(bool onlyExists) const
+{
+    if (onlyExists)
+        return m_xsettings;
+
+    if (!m_xsettings) {
+        auto xsettings = new DXcbXSettings(xcbConnection()->primaryVirtualDesktop());
+        const_cast<DPlatformIntegration*>(this)->m_xsettings = xsettings;
+
+        // 注册回调，用于通知 QStyleHints 属性改变
+        xsettings->registerCallbackForProperty(XSETTINGS_CURSOR_BLINK_TIME,
+                                               onXSettingsChanged,
+                                               reinterpret_cast<void*>(CursorFlashTime));
+        xsettings->registerCallbackForProperty(XSETTINGS_CURSOR_BLINK,
+                                               onXSettingsChanged,
+                                               reinterpret_cast<void*>(CursorFlashTime));
+    }
+
+    return m_xsettings;
+}
+#endif
 
 bool DPlatformIntegration::isWindowBlockedHandle(QWindow *window, QWindow **blockingWindow)
 {
