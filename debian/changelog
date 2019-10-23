@@ -1,3 +1,13 @@
+deepin-qt5dxcb-plugin (5.0.1-2) unstable; urgency=high
+
+  * debian/control:
+    + Add missing build-dependency libxcb-xinput-dev.
+      (Closes: #943309)
+    + Bump Standards-Version to 4.4.1.
+    + Use "Rules-Requires-Root: no".
+
+ -- Boyuan Yang <byang@debian.org>  Wed, 23 Oct 2019 11:58:18 -0400
+
 deepin-qt5dxcb-plugin (5.0.1-1) unstable; urgency=medium
 
   * new upstream version 5.0.1.

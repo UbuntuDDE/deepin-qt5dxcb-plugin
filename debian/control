@@ -26,6 +26,7 @@ Build-Depends:
  libxcb-keysyms1-dev,
  libxcb-render-util0-dev,
  libxcb-xinerama0-dev,
+ libxcb-xinput-dev,
  libxcb-xkb-dev,
  libxi-dev,
  libxkbcommon-x11-dev,
@@ -33,7 +34,8 @@ Build-Depends:
  pkg-config,
  qtbase5-dev,
  qtbase5-private-dev,
-Standards-Version: 4.4.0
+Rules-Requires-Root: no
+Standards-Version: 4.4.1
 Homepage: https://github.com/linuxdeepin/qt5dxcb-plugin
 Vcs-Git: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin.git
 Vcs-Browser: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin
