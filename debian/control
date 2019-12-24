@@ -26,6 +26,7 @@ Build-Depends:
  libxcb-image0-dev,
  libxcb-keysyms1-dev,
  libxcb-render-util0-dev,
+ libxcb-sync-dev,
  libxcb-xinerama0-dev,
  libxcb-xinput-dev,
  libxcb-xkb-dev,
