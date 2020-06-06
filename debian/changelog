@@ -1,3 +1,9 @@
+deepin-qt5dxcb-plugin (5.0.1-4) UNRELEASED; urgency=medium
+
+  * debian/patches: Add a patch for Qt 5.14.2 support (closes: #960953).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sat, 06 Jun 2020 21:29:54 +0300
+
 deepin-qt5dxcb-plugin (5.0.1-3) unstable; urgency=high
 
   * debian/control: Add missing build-dependencies.
