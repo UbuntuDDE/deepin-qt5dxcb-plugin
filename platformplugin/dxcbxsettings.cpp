@@ -53,15 +53,19 @@ struct Q_DECL_HIDDEN DStdFreeDeleter {
     void operator()(void *p) const noexcept { return std::free(p); }
 };
 
+#ifndef Q_XCB_REPLY
 #define Q_XCB_REPLY(call, ...) \
     std::unique_ptr<call##_reply_t, DStdFreeDeleter>( \
         call##_reply(Q_XCB_REPLY_CONNECTION_ARG(__VA_ARGS__), call(__VA_ARGS__), nullptr) \
     )
+#endif
 
+#ifndef Q_XCB_REPLY_UNCHECKED
 #define Q_XCB_REPLY_UNCHECKED(call, ...) \
     std::unique_ptr<call##_reply_t, DStdFreeDeleter>( \
         call##_reply(Q_XCB_REPLY_CONNECTION_ARG(__VA_ARGS__), call##_unchecked(__VA_ARGS__), nullptr) \
     )
+#endif
 
 DPP_BEGIN_NAMESPACE
 /* Implementation of http://standards.freedesktop.org/xsettings-spec/xsettings-0.5.html */
@@ -314,6 +318,10 @@ public:
         uint number_of_settings = ADJUST_BO(byteOrder, quint32, xSettings.mid(8,4).constData());
         const char *data = xSettings.constData() + 12;
         size_t offset = 0;
+        // 记录所有设置项的名称
+        QSet<QByteArray> keys;
+        keys.reserve(number_of_settings);
+
         for (uint i = 0; i < number_of_settings; i++) {
             int local_offset = 0;
             VALIDATE_LENGTH(2);
@@ -363,8 +371,17 @@ public:
             offset += local_offset;
 
             updateValue(settings[name], name,value,last_change_serial);
+            keys << name;
         }
 
+        for (const QByteArray &key : settings.keys()) {
+            if (!keys.contains(key)) {
+                // 通知属性已经无效
+                updateValue(settings[key], key, QVariant(), INT_MAX);
+                // 移除已经被删除的属性
+                settings.remove(key);
+            }
+        }
     }
 
     QByteArray depopulateSettings()
@@ -383,6 +400,7 @@ public:
         for (auto i = settings.constBegin(); i != settings.constEnd(); ++i) {
             const DXcbXSettingsPropertyValue &value = i.value();
 
+            // 忽略无效的数据
             if (!value.value.isValid()) {
                 --*number_of_settings_ptr;
                 continue;
@@ -514,7 +532,7 @@ DXcbXSettings::DXcbXSettings(xcb_window_t setting_window, const QByteArray &prop
 
 DXcbXSettings::~DXcbXSettings()
 {
-    DXcbXSettingsPrivate::mapped.remove(d_ptr->x_settings_window);
+    DXcbXSettingsPrivate::mapped.remove(d_ptr->x_settings_window, this);
     delete d_ptr;
     d_ptr = 0;
 }
@@ -717,9 +735,20 @@ void DXcbXSettings::setSetting(const QByteArray &property, const QVariant &value
 
     d->updateValue(xvalue, property, value, xvalue.last_change_serial + 1);
 
+    // 移除无效的属性
+    if (!value.isValid()) {
+        d->settings.remove(property);
+    }
+
     ++d->serial;
     // 更新属性
     d->setSettings(d->depopulateSettings());
+}
+
+QByteArrayList DXcbXSettings::settingKeys() const
+{
+    Q_D(const DXcbXSettings);
+    return d->settings.keys();
 }
 
 void DXcbXSettings::registerCallback(DXcbXSettings::PropertyChangeFunc func, void *handle)
