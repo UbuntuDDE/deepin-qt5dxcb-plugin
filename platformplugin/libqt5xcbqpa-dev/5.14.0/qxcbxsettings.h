@@ -37,51 +37,35 @@
 **
 ****************************************************************************/
 
-#ifndef DXCBXSETTINGS_H
-#define DXCBXSETTINGS_H
+#ifndef QXCBXSETTINGS_H
+#define QXCBXSETTINGS_H
 
 #include "qxcbscreen.h"
-#include "global.h"
 
-DPP_BEGIN_NAMESPACE
+QT_BEGIN_NAMESPACE
 
-class DXcbXSettingsPrivate;
+class QXcbXSettingsPrivate;
 
-class DXcbXSettings
+class QXcbXSettings : public QXcbWindowEventListener
 {
-    Q_DECLARE_PRIVATE(DXcbXSettings)
+    Q_DECLARE_PRIVATE(QXcbXSettings)
 public:
-    DXcbXSettings(QXcbVirtualDesktop *screen, const QByteArray &property = QByteArray());
-    DXcbXSettings(QXcbVirtualDesktop *screen, xcb_window_t setting_window, const QByteArray &property = QByteArray());
-    DXcbXSettings(xcb_window_t setting_window, const QByteArray &property = QByteArray());
-    ~DXcbXSettings();
+    QXcbXSettings(QXcbVirtualDesktop *screen);
+    ~QXcbXSettings();
     bool initialized() const;
-    bool isEmpty() const;
 
-    bool contains(const QByteArray &property) const;
     QVariant setting(const QByteArray &property) const;
-    void setSetting(const QByteArray &property, const QVariant &value);
-    QByteArrayList settingKeys() const;
 
     typedef void (*PropertyChangeFunc)(QXcbVirtualDesktop *screen, const QByteArray &name, const QVariant &property, void *handle);
-    void registerCallback(PropertyChangeFunc func, void *handle);
     void registerCallbackForProperty(const QByteArray &property, PropertyChangeFunc func, void *handle);
     void removeCallbackForHandle(const QByteArray &property, void *handle);
     void removeCallbackForHandle(void *handle);
-    typedef void (*SignalFunc)(QXcbVirtualDesktop *screen, const QByteArray &signal, qint32 data1, qint32 data2, void *handle);
-    void registerSignalCallback(SignalFunc func, void *handle);
-    void removeSignalCallback(void *handle);
-    void emitSignal(const QByteArray &signal, qint32 data1, qint32 data2);
 
-    static void emitSignal(xcb_window_t window, xcb_atom_t type, const QByteArray &signal, qint32 data1, qint32 data2);
-    static bool handlePropertyNotifyEvent(const xcb_property_notify_event_t *event);
-    static bool handleClientMessageEvent(const xcb_client_message_event_t *event);
-
-    static void clearSettings(xcb_window_t setting_window);
+    void handlePropertyNotifyEvent(const xcb_property_notify_event_t *event) override;
 private:
-    DXcbXSettingsPrivate *d_ptr;
+    QXcbXSettingsPrivate *d_ptr;
 };
 
-DPP_END_NAMESPACE
+QT_END_NAMESPACE
 
-#endif // DXCBXSETTINGS_H
+#endif // QXCBXSETTINGS_H
