@@ -1,3 +1,14 @@
+deepin-qt5dxcb-plugin (5.0.11-1~exp1) experimental; urgency=medium
+
+  * New upstream version 5.0.11.
+  * debian/control:
+    + Bump Standards-Version to 4.5.0.
+    + Bump debhelper-compat to v13.
+    + Add Arun Kumar Pariyar to Uploaders
+  * debian/copyright: Updated copyright and license info.
+  
+ -- Arun Kumar Pariyar <openarungeek@gmail.com>  Fri, 12 Jun 2020 21:56:03 +0545
+
 deepin-qt5dxcb-plugin (5.0.1-3) unstable; urgency=high
 
   * debian/control: Add missing build-dependencies.
