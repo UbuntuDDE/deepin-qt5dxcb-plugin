@@ -1,9 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: qt5dxcb-plugin
-Source: https://github.com/linuxdeepin/qt5dxcb-plugin
+Upstream-Name: qt5platform-plugins
+Upstream-Contact: https://github.com/linuxdeepin/qt5platform-plugins/issues
+Source: https://github.com/linuxdeepin/qt5platform-plugins
 
 Files: *
-Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>
+Copyright: 2016-2019 Deepin Technology Co., Ltd. <support@deepin.com>
            2017-2018 zccrs <ccrr1314@live.com>
 License: GPL-3+
 
@@ -17,9 +18,10 @@ Files: platformplugin/cursors/*
 Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>
 License: GPL-3+
 
-Files: 
+Files:
  platformplugin/dxcbxsettings.h
  platformplugin/dxcbxsettings.cpp
+Copyright: 2016 The Qt Company Ltd.
 License: LGPL-3 or GPL-2+ or GPL-3+
 
 License: GPL-3+
