@@ -1,5 +1,9 @@
 deepin-qt5dxcb-plugin (5.0.11-1~exp1) experimental; urgency=medium
 
+  [ Dmitry Shachnev ]
+  * debian/patches: Add a patch for Qt 5.14.2 support
+
+  [ Arun Kumar Pariyar ]
   * New upstream version 5.0.11.
   * debian/control:
     + Bump Standards-Version to 4.5.0.
@@ -8,7 +12,7 @@ deepin-qt5dxcb-plugin (5.0.11-1~exp1) experimental; urgency=medium
   * debian/copyright: Updated copyright and license info.
   
  -- Arun Kumar Pariyar <openarungeek@gmail.com>  Fri, 12 Jun 2020 21:56:03 +0545
-
+ 
 deepin-qt5dxcb-plugin (5.0.1-3) unstable; urgency=high
 
   * debian/control: Add missing build-dependencies.
