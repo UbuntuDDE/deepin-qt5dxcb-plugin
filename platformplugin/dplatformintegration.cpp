@@ -43,6 +43,7 @@
 #include "xcbnativeeventfilter.h"
 #include "dplatformnativeinterfacehook.h"
 #include "dxcbxsettings.h"
+#include "dhighdpi.h"
 
 #include "qxcbscreen.h"
 #include "qxcbbackingstore.h"
@@ -93,6 +94,7 @@ DPlatformIntegration *DPlatformIntegration::m_instance = Q_NULLPTR;
 #endif
 #endif
 
+DXcbXSettings *DPlatformIntegration::m_xsettings = nullptr;
 DPlatformIntegration::DPlatformIntegration(const QStringList &parameters, int &argc, char **argv)
     : DPlatformIntegrationParent(parameters, argc, argv)
 #ifdef USE_NEW_IMPLEMENTING
@@ -124,6 +126,10 @@ DPlatformIntegration::~DPlatformIntegration()
 #ifdef USE_NEW_IMPLEMENTING
     delete m_storeHelper;
     delete m_contextHelper;
+
+    if (m_xsettings) {
+        delete m_xsettings;
+    }
 #endif
 }
 
@@ -138,6 +144,14 @@ void DPlatformIntegration::setWindowProperty(QWindow *window, const char *name, 
 
 bool DPlatformIntegration::enableDxcb(QWindow *window)
 {
+    static bool xwayland = QByteArrayLiteral("wayland") == qgetenv("XDG_SESSION_TYPE")
+            && !qEnvironmentVariableIsEmpty("WAYLAND_DISPLAY");
+
+    if (xwayland) {
+        // for xwayland
+        return false;
+    }
+
     qDebug() << __FUNCTION__ << window << window->type() << window->parent();
 
     if (window->type() == Qt::Desktop)
@@ -291,6 +305,11 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
 #ifdef Q_OS_LINUX
         Q_UNUSED(new WindowEventHook(static_cast<QNativeWindow*>(w), false))
 #endif
+        // for hi dpi
+        if (DHighDpi::isActive()) {
+//            VtableHook::overrideVfptrFun(w, &QPlatformWindow::devicePixelRatio, &DHighDpi::devicePixelRatio);
+        }
+
         return w;
     }
 
@@ -446,8 +465,11 @@ QPaintEngine *DPlatformIntegration::createImagePaintEngine(QPaintDevice *paintDe
 QStringList DPlatformIntegration::themeNames() const
 {
     QStringList list = DPlatformIntegrationParent::themeNames();
+    const QByteArray desktop_session = qgetenv("DESKTOP_SESSION");
 
-    list.prepend("deepin");
+    // 在lightdm环境中，无此环境变量
+    if (desktop_session.isEmpty() || desktop_session == "deepin")
+        list.prepend("deepin");
 
     return list;
 }
@@ -471,6 +493,13 @@ QVariant DPlatformIntegration::styleHint(QPlatformIntegration::StyleHint hint) c
     case MouseDoubleClickInterval:
         GET_VALID_XSETTINGS(XSETTINGS_DOUBLE_CLICK_TIME);
         break;
+    // QComboBox控件会根据此参数判断是应当在鼠标press还是release时弹出下拉列表
+    // 此值默认为false，QFontComboBox在第一次弹出时有些卡顿，然而，ComboBox本身
+    // 又会在收到Release事件时认为是对下拉列表进行了选中操作，卡顿会导致Release事件
+    // 传递给了下拉列表，因此会出现第一次弹出列表后又立即隐藏的行为。将触发列表弹出的
+    // 动作改为release则可避免此问题
+    case SetFocusOnTouchRelease:
+        return true;
     default:
         break;
     }
@@ -895,6 +924,11 @@ static void hookScreenGetWindow(QScreen *screen)
         VtableHook::overrideVfptrFun(screen->handle(), &QPlatformScreen::topLevelAt, &overrideTopLevelAt);
 }
 
+static void watchScreenDPIChange(QScreen *screen)
+{
+    DPlatformIntegration::instance()->xSettings()->registerCallbackForProperty("Qt/DPI/" + screen->name().toLocal8Bit(), &DHighDpi::onDPIChanged, screen);
+}
+
 static void startDrag(QXcbDrag *drag)
 {
     VtableHook::callOriginalFun(drag, &QXcbDrag::startDrag);
@@ -925,7 +959,7 @@ void DPlatformIntegration::initialize()
     // 由于Qt很多代码中写死了是xcb，所以只能伪装成是xcb
     // FIXME: set platform_name to xcb to avoid webengine crash
     // It need dtk update tag, make it default when dtk udate
-    if (qEnvironmentVariableIsSet("DXCB_FAKE_PLATFORM_NAME_XCB")) {
+    if (qgetenv("DXCB_FAKE_PLATFORM_NAME_XCB") != "0") {
         *QGuiApplicationPrivate::platform_name = "xcb";
     }
     qApp->setProperty("_d_isDxcb", true);
@@ -978,9 +1012,19 @@ void DPlatformIntegration::initialize()
 
     for (QScreen *s : qApp->screens()) {
         hookScreenGetWindow(s);
+
+        if (DHighDpi::isActive()) {
+            // 监听屏幕dpi变化
+            watchScreenDPIChange(s);
+        }
     }
 
     QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &hookScreenGetWindow);
+
+    if (DHighDpi::isActive()) {
+        // 监听屏幕dpi变化
+        QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &watchScreenDPIChange);
+    }
 }
 
 #ifdef Q_OS_LINUX
@@ -1011,9 +1055,14 @@ DXcbXSettings *DPlatformIntegration::xSettings(bool onlyExists) const
     if (onlyExists)
         return m_xsettings;
 
+    return xSettings(xcbConnection()->primaryVirtualDesktop());
+}
+
+DXcbXSettings *DPlatformIntegration::xSettings(QXcbVirtualDesktop *desktop)
+{
     if (!m_xsettings) {
-        auto xsettings = new DXcbXSettings(xcbConnection()->primaryVirtualDesktop());
-        const_cast<DPlatformIntegration*>(this)->m_xsettings = xsettings;
+        auto xsettings = new DXcbXSettings(desktop);
+        m_xsettings = xsettings;
 
         // 注册回调，用于通知 QStyleHints 属性改变
         xsettings->registerCallbackForProperty(XSETTINGS_CURSOR_BLINK_TIME,
@@ -1022,6 +1071,11 @@ DXcbXSettings *DPlatformIntegration::xSettings(bool onlyExists) const
         xsettings->registerCallbackForProperty(XSETTINGS_CURSOR_BLINK,
                                                onXSettingsChanged,
                                                reinterpret_cast<void*>(CursorFlashTime));
+
+        if (DHighDpi::isActive()) {
+            // 监听XSettings的dpi设置变化
+            xsettings->registerCallbackForProperty("Xft/DPI", &DHighDpi::onDPIChanged, nullptr);
+        }
     }
 
     return m_xsettings;

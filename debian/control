@@ -5,8 +5,9 @@ Maintainer: Debian Deepin Packaging Team <pkg-deepin-devel@lists.alioth.debian.o
 Uploaders:
  Boyuan Yang <byang@debian.org>,
  Yanhao Mo <yanhaocs@gmail.com>,
+ Arun Kumar Pariyar <openarungeek@gmail.com>,
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 13),
  libcairo2-dev,
  libdbus-1-dev,
  libdtkcore-dev (>= 2.0.5.2-2~),
@@ -38,7 +39,7 @@ Build-Depends:
  qtbase5-dev,
  qtbase5-private-dev,
 Rules-Requires-Root: no
-Standards-Version: 4.4.1
+Standards-Version: 4.5.0
 Homepage: https://github.com/linuxdeepin/qt5dxcb-plugin
 Vcs-Git: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin.git
 Vcs-Browser: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin

@@ -21,7 +21,9 @@
 #include "dframewindow.h"
 
 #include "qxcbconnection.h"
+#define private public
 #include "qxcbscreen.h"
+#undef private
 #include "qxcbwindow.h"
 
 DPP_BEGIN_NAMESPACE
@@ -87,9 +89,9 @@ void DXcbWMSupport::updateWMName(bool emitSignal)
     m_isDeepinWM = (m_wmName == QStringLiteral("Mutter(DeepinGala)"));
     m_isKwin = !m_isDeepinWM && (m_wmName == QStringLiteral("KWin"));
 
+    updateHasComposite();
     updateNetWMAtoms();
     updateRootWindowProperties();
-    updateHasComposite();
 
     if (emitSignal)
         emit windowManagerChanged();
@@ -161,7 +163,7 @@ void DXcbWMSupport::updateHasBlurWindow()
     bool hasBlurWindow((m_isDeepinWM && isSupportedByWM(_net_wm_deepin_blur_region_rounded_atom))
                        || (m_isKwin && isContainsForRootWindow(_kde_net_wm_blur_rehind_region_atom)));
     // 当窗口visual不支持alpha通道时，也等价于不支持窗口背景模糊
-    hasBlurWindow = hasBlurWindow && getHasWindowAlpha();
+    hasBlurWindow = hasBlurWindow && getHasWindowAlpha() && hasComposite();
 
     if (m_hasBlurWindow == hasBlurWindow)
         return;
@@ -173,16 +175,40 @@ void DXcbWMSupport::updateHasBlurWindow()
 
 void DXcbWMSupport::updateHasComposite()
 {
+    bool hasComposite;
+
     xcb_connection_t *xcb_connection = DPlatformIntegration::xcbConnection()->xcb_connection();
-    xcb_get_selection_owner_cookie_t cookit = xcb_get_selection_owner(xcb_connection, DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_NET_WM_CM_S0));
-    xcb_get_selection_owner_reply_t *reply = xcb_get_selection_owner_reply(xcb_connection, cookit, NULL);
 
-    if (!reply)
-        return;
+    auto atom = Utility::internAtom("_NET_KDE_COMPOSITE_TOGGLING");
+    xcb_window_t root = DPlatformIntegration::xcbConnection()->primaryScreen()->root();
 
-    bool hasComposite(reply->owner != XCB_NONE);
+    //stage1: check if _NET_KDE_COMPOSITE_TOGGLING is supported
+    xcb_get_property_reply_t *reply = xcb_get_property_reply(xcb_connection,
+            xcb_get_property_unchecked(xcb_connection, false, root, atom, atom, 0, 1), NULL);
+    if (reply && reply->type != XCB_NONE) {
+        int value = 0;
+        if (reply->type == atom && reply->format == 8) {
+            value = *(int*)xcb_get_property_value(reply);
+        }
 
-    free(reply);
+        hasComposite = value == 1;
+        free(reply);
+
+        // 及时更新Qt中记录的值，KWin在关闭窗口合成的一段时间内（2S）并未释放相关的selection owner
+        // 因此会导致Qt中的值在某个阶段与真实状态不匹配，用到QX11Info::isCompositingManagerRunning()
+        // 的地方会出现问题，如drag窗口
+        DPlatformIntegration::xcbConnection()->primaryVirtualDesktop()->m_compositingActive = hasComposite;
+    } else {
+        //stage2: fallback to check selection owner
+        xcb_get_selection_owner_cookie_t cookit = xcb_get_selection_owner(xcb_connection, DPlatformIntegration::xcbConnection()->atom(QXcbAtom::_NET_WM_CM_S0));
+        xcb_get_selection_owner_reply_t *reply = xcb_get_selection_owner_reply(xcb_connection, cookit, NULL);
+        if (!reply)
+            return;
+
+        hasComposite = reply->owner != XCB_NONE;
+
+        free(reply);
+    }
 
     if (m_hasComposite == hasComposite)
         return;
@@ -206,7 +232,7 @@ void DXcbWMSupport::updateHasNoTitlebar()
 
 void DXcbWMSupport::updateHasScissorWindow()
 {
-    bool hasScissorWindow(net_wm_atoms.contains(_deepin_scissor_window));
+    bool hasScissorWindow(net_wm_atoms.contains(_deepin_scissor_window) && hasComposite());
 
     if (m_hasScissorWindow == hasScissorWindow)
         return;

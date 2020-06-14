@@ -7,14 +7,20 @@ Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>
            2017-2018 zccrs <ccrr1314@live.com>
 License: GPL-3+
 
+Files: debian/*
+Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
+           2018 Boyuan Yang <073plan@gmail.com>
+           2020 Arun Kumar Pariyar <openarungeek@gmail.com>
+License: GPL-3+
+
 Files: platformplugin/cursors/*
 Copyright: 2017-2018 Deepin Technology Co., Ltd. <support@deepin.com>
 License: GPL-3+
 
-Files: debian/*
-Copyright: 2017 Deepin Technology Co., Ltd. <support@deepin.com>
-           2018 Boyuan Yang <073plan@gmail.com>
-License: GPL-3+
+Files: 
+ platformplugin/dxcbxsettings.h
+ platformplugin/dxcbxsettings.cpp
+License: LGPL-3 or GPL-2+ or GPL-3+
 
 License: GPL-3+
  This package is free software; you can redistribute it and/or modify
@@ -32,3 +38,36 @@ License: GPL-3+
  .
  On Debian systems, the complete text of the GNU General
  Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: LGPL-3
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License version 3as
+ published by the Free Software Foundation.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU Library General Public
+ License Version 3 can be found in "/usr/share/common-licenses/LGPL-3".
+
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".

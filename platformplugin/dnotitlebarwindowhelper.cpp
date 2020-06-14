@@ -86,6 +86,10 @@ DNoTitlebarWindowHelper::DNoTitlebarWindowHelper(QWindow *window, quint32 window
 
 DNoTitlebarWindowHelper::~DNoTitlebarWindowHelper()
 {
+    if (VtableHook::hasVtable(m_window)) {
+        VtableHook::resetVtable(m_window);
+    }
+
     mapped.remove(qobject_cast<QWindow*>(parent()));
 
     if (m_window->handle()) { // 当本地窗口还存在时，移除设置过的窗口属性
@@ -470,7 +474,15 @@ bool DNoTitlebarWindowHelper::windowEvent(QEvent *event)
 
     bool ret = VtableHook::callOriginalFun(w, &QWindow::event, event);
 
-    if (is_mouse_move && !event->isAccepted()) {
+    // workaround for kwin: Qt receives no release event when kwin finishes MOVE operation, 
+    // which makes app hang in windowMoving state. when a press happens, there's no sense of
+    // keeping the moving state, we can just reset ti back to normal.
+    if (event->type() == QEvent::MouseButtonPress) {
+        self->m_windowMoving = false;
+    }
+
+    if (is_mouse_move && !event->isAccepted()
+            && w->geometry().contains(static_cast<QMouseEvent*>(event)->globalPos())) {
         if (!self->m_windowMoving && self->isEnableSystemMove(winId)) {
             self->m_windowMoving = true;
 
@@ -490,7 +502,7 @@ bool DNoTitlebarWindowHelper::isEnableSystemMove(quint32 winId)
 #ifdef Q_OS_LINUX
     quint32 hints = DXcbWMSupport::getMWMFunctions(Utility::getNativeTopLevelWindow(winId));
 
-    return (hints == DXcbWMSupport::MWM_FUNC_ALL || hints & DXcbWMSupport::MWM_FUNC_MOVE);
+    return ((hints & DXcbWMSupport::MWM_FUNC_ALL) || hints & DXcbWMSupport::MWM_FUNC_MOVE);
 #endif
 
     return true;

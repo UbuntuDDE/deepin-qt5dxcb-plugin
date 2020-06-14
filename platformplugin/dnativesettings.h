@@ -45,7 +45,7 @@ public:
     bool isValid() const;
 
 private:
-    void init();
+    void init(const QMetaObject *meta_object);
 
     int createProperty(const char *, const char *) override;
     int metaCall(QMetaObject::Call, int _id, void **) override;
@@ -63,9 +63,12 @@ private:
     int m_propertySignalIndex;
     // VALID_PROPERTIES属性的index
     int m_flagPropertyIndex;
+    // ALL_KEYS属性的index
+    int m_allKeysPropertyIndex;
     // 用于转发base对象产生的信号的槽，使用native settings的接口将其发送出去. 值为0时表示不转发base对象的所有信号
     int m_relaySlotIndex = 0;
     NativeSettings *m_settings = nullptr;
+    bool m_isGlobalSettings = false;
 
     static QHash<QObject*, DNativeSettings*> mapped;
 };
