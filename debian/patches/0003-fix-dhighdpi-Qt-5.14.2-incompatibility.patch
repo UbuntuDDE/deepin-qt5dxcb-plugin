@@ -1,36 +1,7 @@
-Description: <short summary of the patch>
- TODO: Put a short summary on the line above and replace this paragraph
- with a longer explanation of this change. Complete the meta-information
- with other relevant fields (see below for details). To make it easier, the
- information below has been extracted from the changelog. Adjust it or drop
- it.
- .
- deepin-qt5dxcb-plugin (5.0.11-1~exp1) experimental; urgency=medium
- .
-   [ Dmitry Shachnev ]
-   * debian/patches: Add a patch for Qt 5.14.2 support (closes: #960953).
- .
-   [ Arun Kumar Pariyar ]
-   * New upstream version 5.0.11.
-   * debian/control:
-     + Bump Standards-Version to 4.5.0.
-     + Bump debhelper-compat to v13.
-     + Add Arun Kumar Pariyar to Uploaders
-   * debian/copyright: Updated copyright and license info.
+Description: Fix patch for Qt 5.14.2 incompatibility issue.
+ Fix for proper build with Qt 5.14.2 due to incompatibility with 
+ dhighdpi.cpp under platformplugin.
 Author: Arun Kumar Pariyar <openarungeek@gmail.com>
-Bug-Debian: https://bugs.debian.org/960953
-
----
-The information above should follow the Patch Tagging Guidelines, please
-checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
-are templates for supplementary fields that you might want to add:
-
-Origin: <vendor|upstream|other>, <url of original patch>
-Bug: <url in upstream bugtracker>
-Bug-Debian: https://bugs.debian.org/<bugnumber>
-Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
-Forwarded: <no|not-needed|url proving that it has been forwarded>
-Reviewed-By: <name and email of someone who approved the patch>
 Last-Update: 2020-06-14
 
 --- deepin-qt5dxcb-plugin-5.0.11.orig/platformplugin/dhighdpi.cpp

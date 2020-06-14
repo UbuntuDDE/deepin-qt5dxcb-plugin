@@ -1,15 +1,17 @@
 deepin-qt5dxcb-plugin (5.0.11-1~exp1) experimental; urgency=medium
 
   [ Dmitry Shachnev ]
-  * debian/patches: Add a patch for Qt 5.14.2 support
+  * debian/patches: Add a patch for Qt 5.14.2 support.
 
   [ Arun Kumar Pariyar ]
   * New upstream version 5.0.11.
   * debian/control:
     + Bump Standards-Version to 4.5.0.
     + Bump debhelper-compat to v13.
-    + Add Arun Kumar Pariyar to Uploaders
+    + Add Arun Kumar Pariyar to Uploaders.
+    + Add dde-qt5xcb-plugin package.
   * debian/copyright: Updated copyright and license info.
+  * debian/patches : Add patch for dhighdpi Qt 5.14.2 incompatibility issue.
   
  -- Arun Kumar Pariyar <openarungeek@gmail.com>  Fri, 12 Jun 2020 21:56:03 +0545
  
