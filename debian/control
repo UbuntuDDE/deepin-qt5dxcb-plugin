@@ -1,4 +1,4 @@
-Source: qt5dxcb-plugin
+Source: dde-qt5platform-plugins
 Section: devel
 Priority: optional
 Maintainer: Deepin Packages Builder <packages@deepin.com>
@@ -8,14 +8,22 @@ Build-Depends: debhelper (>=9), qtbase5-dev, qtbase5-private-dev,
  libmtdev-dev, libxkbcommon-x11-dev, libdbus-1-dev, libqt5opengl5-dev, 
  libudev-dev, libxrender-dev,libxi-dev, libsm-dev, libxcb-xinerama0-dev,
  libfontconfig1-dev, libfreetype6-dev, libglib2.0-dev, libxcb-damage0-dev,
- libxcb-composite0-dev, libcairo2-dev
+ libxcb-composite0-dev, libcairo2-dev, libqt5waylandclient5-dev, libkf5wayland-dev,
+ libwayland-dev, libdde-waylandclient-dev
 Standards-Version: 3.9.8
 
-Package: qt5dxcb-plugin
+Package: dde-qt5xcb-plugin
 Architecture: any
 Provides: libqt5dxcb-plugin
-Conflicts: libqt5dxcb-plugin
+Conflicts: libqt5dxcb-plugin, qt5dxcb-plugin
 Breaks:dde-qt5integration (<< 0.2.8.1)
+Replaces: qt5dxcb-plugin
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Qt platform plugins
+ Qt platform plugins for DDE.
+
+Package: dde-qt5wayland-plugin
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Qt platform plugins
  Qt platform plugins for DDE.
