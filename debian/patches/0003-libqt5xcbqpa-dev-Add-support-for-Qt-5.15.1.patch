@@ -1,66 +1,65 @@
-From: Boyuan Yang <byang@debian.org>
-Date: Fri, 27 Sep 2019 15:24:50 -0400
-Subject: libqt5xcbqpa-dev: Add support for Qt 5.12.5
+From a1f4cacf079be17f7d9800411f557d1c82c4f7bf Mon Sep 17 00:00:00 2001
+From: Arun Kumar Pariyar <openarungeek@gmail.com>
+Date: Thu, 5 Nov 2020 18:56:55 +0545
+Subject: [PATCH] libqt5xcbqpa-dev: Add support for Qt 5.15.1
 
 ---
- platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbatom.h  | 257 +++++++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbbackingstore.h     | 116 ++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbclipboard.h        | 152 ++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbconnection.h       | 417 +++++++++++++++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbconnection_basic.h | 176 +++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbcursor.h           | 129 +++++++
- platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbdrag.h  | 185 +++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbeventdispatcher.h  | 114 ++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbeventqueue.h       | 169 +++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbexport.h           |  55 +++
- platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbimage.h |  62 +++
- .../libqt5xcbqpa-dev/5.12.5/qxcbintegration.h      | 150 ++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbkeyboard.h         | 171 +++++++++
- platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbmime.h  |  70 ++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbnativeinterface.h  | 156 ++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbobject.h           |  64 ++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbscreen.h           | 240 ++++++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbsessionmanager.h   |  96 +++++
- .../5.12.5/qxcbsystemtraytracker.h                 |  85 +++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbvulkaninstance.h   |  76 ++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbvulkanwindow.h     |  65 ++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbwindow.h           | 303 +++++++++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbwmsupport.h        |  68 ++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbxkbcommon.h        | 233 ++++++++++++
- .../libqt5xcbqpa-dev/5.12.5/qxcbxsettings.h        |  71 ++++
- 25 files changed, 3680 insertions(+)
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbatom.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbbackingstore.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbclipboard.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection_basic.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbcursor.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbdrag.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventdispatcher.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventqueue.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbexport.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbimage.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbintegration.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbkeyboard.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbmime.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbnativeinterface.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbobject.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbscreen.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsessionmanager.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsystemtraytracker.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkaninstance.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkanwindow.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwindow.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwmsupport.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxkbcommon.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxsettings.h
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbatom.h        | 259 +++++++++++
+ .../5.15.1/qxcbbackingstore.h                 | 116 +++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbclipboard.h   | 152 +++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection.h  | 409 ++++++++++++++++++
+ .../5.15.1/qxcbconnection_basic.h             | 175 ++++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbcursor.h      | 129 ++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbdrag.h        | 198 +++++++++
+ .../5.15.1/qxcbeventdispatcher.h              | 114 +++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventqueue.h  | 169 ++++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbexport.h      |  55 +++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbimage.h       |  62 +++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbintegration.h | 150 +++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbkeyboard.h    | 141 ++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbmime.h        |  70 +++
+ .../5.15.1/qxcbnativeinterface.h              | 156 +++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbobject.h      |  64 +++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbscreen.h      | 239 ++++++++++
+ .../5.15.1/qxcbsessionmanager.h               |  94 ++++
+ .../5.15.1/qxcbsystemtraytracker.h            |  85 ++++
+ .../5.15.1/qxcbvulkaninstance.h               |  76 ++++
+ .../5.15.1/qxcbvulkanwindow.h                 |  65 +++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbwindow.h      | 305 +++++++++++++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbwmsupport.h   |  68 +++
+ xcb/libqt5xcbqpa-dev/5.15.1/qxcbxsettings.h   |  71 +++
+ 24 files changed, 3422 insertions(+)
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbatom.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbbackingstore.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbclipboard.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection_basic.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbcursor.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbdrag.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventdispatcher.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventqueue.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbexport.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbimage.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbintegration.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbkeyboard.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbmime.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbnativeinterface.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbobject.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbscreen.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbsessionmanager.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbsystemtraytracker.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkaninstance.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkanwindow.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbwindow.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbwmsupport.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.15.1/qxcbxsettings.h
 
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbatom.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbatom.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbatom.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbatom.h
 new file mode 100644
-index 0000000..233d2ea
+index 0000000..9cf93ec
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbatom.h
-@@ -0,0 +1,257 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbatom.h
+@@ -0,0 +1,259 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2018 The Qt Company Ltd.
@@ -186,6 +185,7 @@ index 0000000..233d2ea
 +        _NET_WM_STATE_MODAL,
 +        _NET_WM_STATE_STAYS_ON_TOP,
 +        _NET_WM_STATE_DEMANDS_ATTENTION,
++        _NET_WM_STATE_HIDDEN,
 +
 +        _NET_WM_USER_TIME,
 +        _NET_WM_USER_TIME_WINDOW,
@@ -245,6 +245,7 @@ index 0000000..233d2ea
 +        XdndActionCopy,
 +        XdndActionLink,
 +        XdndActionMove,
++        XdndActionAsk,
 +        XdndActionPrivate,
 +
 +        // Xkb
@@ -318,11 +319,11 @@ index 0000000..233d2ea
 +};
 +
 +#endif // QXCBATOM_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbbackingstore.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbbackingstore.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbbackingstore.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbbackingstore.h
 new file mode 100644
 index 0000000..0c30929
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbbackingstore.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbbackingstore.h
 @@ -0,0 +1,116 @@
 +/****************************************************************************
 +**
@@ -440,11 +441,11 @@ index 0000000..0c30929
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbclipboard.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbclipboard.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbclipboard.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbclipboard.h
 new file mode 100644
-index 0000000..26d3b3b
+index 0000000..51ae0dc
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbclipboard.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbclipboard.h
 @@ -0,0 +1,152 @@
 +/****************************************************************************
 +**
@@ -561,7 +562,7 @@ index 0000000..26d3b3b
 +    xcb_window_t getSelectionOwner(xcb_atom_t atom) const;
 +    QByteArray getSelection(xcb_atom_t selection, xcb_atom_t target, xcb_atom_t property, xcb_timestamp_t t = 0);
 +
-+    int increment() const { return m_increment; }
++    int increment() const { return m_maxPropertyRequestDataBytes; }
 +    int clipboardTimeout() const { return clipboard_timeout; }
 +
 +    void removeTransaction(xcb_window_t window) { m_transactions.remove(window); }
@@ -585,7 +586,7 @@ index 0000000..26d3b3b
 +
 +    static const int clipboard_timeout;
 +
-+    int m_increment = 0;
++    int m_maxPropertyRequestDataBytes = 0;
 +    bool m_clipboard_closing = false;
 +    xcb_timestamp_t m_incr_receive_time = 0;
 +
@@ -598,12 +599,12 @@ index 0000000..26d3b3b
 +QT_END_NAMESPACE
 +
 +#endif // QXCBCLIPBOARD_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection.h
 new file mode 100644
-index 0000000..15537fe
+index 0000000..8a4b577
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection.h
-@@ -0,0 +1,417 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection.h
+@@ -0,0 +1,409 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2016 The Qt Company Ltd.
@@ -649,6 +650,7 @@ index 0000000..15537fe
 +#include <xcb/xcb.h>
 +#include <xcb/randr.h>
 +
++#include <QtCore/QTimer>
 +#include <QtGui/private/qtguiglobal_p.h>
 +#include "qxcbexport.h"
 +#include <QHash>
@@ -709,11 +711,9 @@ index 0000000..15537fe
 +    virtual void handleFocusInEvent(const xcb_focus_in_event_t *) {}
 +    virtual void handleFocusOutEvent(const xcb_focus_out_event_t *) {}
 +    virtual void handlePropertyNotifyEvent(const xcb_property_notify_event_t *) {}
-+#if QT_CONFIG(xcb_xinput)
 +    virtual void handleXIMouseEvent(xcb_ge_event_t *, Qt::MouseEventSource = Qt::MouseEventNotSynthesized) {}
 +    virtual void handleXIEnterLeave(xcb_ge_event_t *) {}
-+#endif
-+    virtual QXcbWindow *toWindow() { return 0; }
++    virtual QXcbWindow *toWindow() { return nullptr; }
 +};
 +
 +typedef QHash<xcb_window_t, QXcbWindowEventListener *> WindowMapper;
@@ -734,7 +734,7 @@ index 0000000..15537fe
 +{
 +    Q_OBJECT
 +public:
-+    QXcbConnection(QXcbNativeInterface *nativeInterface, bool canGrabServer, xcb_visualid_t defaultVisualId, const char *displayName = 0);
++    QXcbConnection(QXcbNativeInterface *nativeInterface, bool canGrabServer, xcb_visualid_t defaultVisualId, const char *displayName = nullptr);
 +    ~QXcbConnection();
 +
 +    QXcbConnection *connection() const { return const_cast<QXcbConnection *>(this); }
@@ -789,9 +789,6 @@ index 0000000..15537fe
 +    QXcbWindowEventListener *windowEventListenerFromId(xcb_window_t id);
 +    QXcbWindow *platformWindowFromId(xcb_window_t id);
 +
-+    typedef bool (*PeekFunc)(QXcbConnection *, xcb_generic_event_t *);
-+    void addPeekFunc(PeekFunc f);
-+
 +    inline xcb_timestamp_t time() const { return m_time; }
 +    inline void setTime(xcb_timestamp_t t) { if (timeGreaterThan(t, m_time)) m_time = t; }
 +
@@ -833,7 +830,6 @@ index 0000000..15537fe
 +
 +    bool isUserInputEvent(xcb_generic_event_t *event) const;
 +
-+#if QT_CONFIG(xcb_xinput)
 +    void xi2SelectStateEvents();
 +    void xi2SelectDeviceEvents(xcb_window_t window);
 +    void xi2SelectDeviceEventsCompatibility(xcb_window_t window);
@@ -841,10 +837,9 @@ index 0000000..15537fe
 +    bool xi2MouseEventsDisabled() const;
 +    Qt::MouseButton xiToQtMouseButton(uint32_t b);
 +    void xi2UpdateScrollingDevices();
-+    bool startSystemMoveResizeForTouchBegin(xcb_window_t window, const QPoint &point, int corner);
++    bool startSystemMoveResizeForTouch(xcb_window_t window, int edges);
 +    void abortSystemMoveResizeForTouch();
 +    bool isTouchScreen(int id);
-+#endif
 +
 +    bool canGrab() const { return m_canGrabServer; }
 +
@@ -852,6 +847,8 @@ index 0000000..15537fe
 +
 +    void flush() { xcb_flush(xcb_connection()); }
 +    void processXcbEvents(QEventLoop::ProcessEventsFlags flags);
++
++    QTimer &focusInTimer() { return m_focusInTimer; }
 +
 +protected:
 +    bool event(QEvent *e) override;
@@ -873,7 +870,6 @@ index 0000000..15537fe
 +    inline bool timeGreaterThan(xcb_timestamp_t a, xcb_timestamp_t b) const
 +    { return static_cast<int32_t>(a - b) > 0 || b == XCB_CURRENT_TIME; }
 +
-+#if QT_CONFIG(xcb_xinput)
 +    void xi2SetupDevice(void *info, bool removeExisting = true);
 +    void xi2SetupDevices();
 +    struct TouchDeviceData {
@@ -905,7 +901,7 @@ index 0000000..15537fe
 +        int deviceId = 0;
 +        QTabletEvent::PointerType pointerType = QTabletEvent::UnknownPointer;
 +        QTabletEvent::TabletDevice tool = QTabletEvent::Stylus;
-+        Qt::MouseButtons buttons = 0;
++        Qt::MouseButtons buttons;
 +        qint64 serialId = 0;
 +        bool inProximity = false;
 +        struct ValuatorClassInfo {
@@ -929,8 +925,8 @@ index 0000000..15537fe
 +        int horizontalIndex = 0;
 +        double verticalIncrement = 0;
 +        double horizontalIncrement = 0;
-+        Qt::Orientations orientations = 0;
-+        Qt::Orientations legacyOrientations = 0;
++        Qt::Orientations orientations;
++        Qt::Orientations legacyOrientations;
 +        QPointF lastScrollPosition;
 +    };
 +    QHash<int, ScrollingDevice> m_scrollingDevices;
@@ -945,9 +941,8 @@ index 0000000..15537fe
 +        xcb_window_t window = XCB_NONE;
 +        uint16_t deviceid;
 +        uint32_t pointid;
-+        int corner;
++        int edges;
 +    } m_startSystemMoveResizeInfo;
-+#endif // QT_CONFIG(xcb_xinput)
 +
 +    const bool m_canGrabServer;
 +    const xcb_visualid_t m_defaultVisualId;
@@ -972,9 +967,7 @@ index 0000000..15537fe
 +
 +    WindowMapper m_mapper;
 +
-+    QVector<PeekFunc> m_peekFuncs;
-+
-+    Qt::MouseButtons m_buttonState = 0;
++    Qt::MouseButtons m_buttonState;
 +    Qt::MouseButton m_button = Qt::NoButton;
 +
 +    QXcbWindow *m_focusWindow = nullptr;
@@ -994,12 +987,12 @@ index 0000000..15537fe
 +    friend class QXcbEventQueue;
 +
 +    QByteArray m_xdgCurrentDesktop;
++    QTimer m_focusInTimer;
++
 +};
-+#if QT_CONFIG(xcb_xinput)
 +#if QT_CONFIG(tabletevent)
 +Q_DECLARE_TYPEINFO(QXcbConnection::TabletData::ValuatorClassInfo, Q_PRIMITIVE_TYPE);
 +Q_DECLARE_TYPEINFO(QXcbConnection::TabletData, Q_MOVABLE_TYPE);
-+#endif
 +#endif
 +
 +class QXcbConnectionGrabber
@@ -1021,12 +1014,12 @@ index 0000000..15537fe
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection_basic.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection_basic.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection_basic.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection_basic.h
 new file mode 100644
-index 0000000..6e407a5
+index 0000000..109186f
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbconnection_basic.h
-@@ -0,0 +1,176 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbconnection_basic.h
+@@ -0,0 +1,175 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2018 The Qt Company Ltd.
@@ -1103,6 +1096,8 @@ index 0000000..6e407a5
 +    }
 +    const xcb_setup_t *setup() const { return m_setup; }
 +
++    size_t maxRequestDataBytes(size_t requestSize) const;
++
 +    inline xcb_atom_t atom(QXcbAtom::Atom qatom) const { return m_xcbAtom.atom(qatom); }
 +    QXcbAtom::Atom qatom(xcb_atom_t atom) const { return m_xcbAtom.qatom(atom); }
 +    xcb_atom_t internAtom(const char *name);
@@ -1124,13 +1119,12 @@ index 0000000..6e407a5
 +    bool hasShmFd() const { return m_hasShmFd; }
 +    bool hasXSync() const { return m_hasXSync; }
 +    bool hasXinerama() const { return m_hasXinerama; }
++    bool hasBigRequest() const;
 +
-+#if QT_CONFIG(xcb_xinput)
 +    bool isAtLeastXI21() const { return m_xi2Enabled && m_xi2Minor >= 1; }
 +    bool isAtLeastXI22() const { return m_xi2Enabled && m_xi2Minor >= 2; }
 +    bool isXIEvent(xcb_generic_event_t *event) const;
 +    bool isXIType(xcb_generic_event_t *event, uint16_t type) const;
-+#endif
 +
 +    bool isXFixesType(uint responseType, int eventType) const;
 +    bool isXRandrType(uint responseType, int eventType) const;
@@ -1145,9 +1139,7 @@ index 0000000..6e407a5
 +    void initializeXShape();
 +    void initializeXKB();
 +    void initializeXSync();
-+#if QT_CONFIG(xcb_xinput)
 +    void initializeXInput2();
-+#endif
 +
 +private:
 +#if QT_CONFIG(xcb_xlib)
@@ -1173,21 +1165,21 @@ index 0000000..6e407a5
 +    QPair<int, int> m_xrenderVersion;
 +
 +    bool m_xi2Enabled = false;
-+#if QT_CONFIG(xcb_xinput)
 +    int m_xi2Minor = -1;
 +    int m_xiOpCode = -1;
 +    uint32_t m_xinputFirstEvent = 0;
-+#endif
 +
 +    uint32_t m_xfixesFirstEvent = 0;
 +    uint32_t m_xrandrFirstEvent = 0;
 +    uint32_t m_xkbFirstEvent = 0;
++
++    uint32_t m_maximumRequestLength = 0;
 +};
 +
 +#define Q_XCB_REPLY_CONNECTION_ARG(connection, ...) connection
 +
 +struct QStdFreeDeleter {
-+    void operator()(void *p) const Q_DECL_NOTHROW { return std::free(p); }
++    void operator()(void *p) const noexcept { return std::free(p); }
 +};
 +
 +#define Q_XCB_REPLY(call, ...) \
@@ -1203,11 +1195,11 @@ index 0000000..6e407a5
 +QT_END_NAMESPACE
 +
 +#endif // QXCBBASICCONNECTION_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbcursor.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbcursor.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbcursor.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbcursor.h
 new file mode 100644
-index 0000000..5bc8063
+index 0000000..0b23882
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbcursor.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbcursor.h
 @@ -0,0 +1,129 @@
 +/****************************************************************************
 +**
@@ -1276,7 +1268,7 @@ index 0000000..5bc8063
 +    return k1.shape == k2.shape && k1.bitmapCacheKey == k2.bitmapCacheKey && k1.maskCacheKey == k2.maskCacheKey;
 +}
 +
-+inline uint qHash(const QXcbCursorCacheKey &k, uint seed) Q_DECL_NOTHROW
++inline uint qHash(const QXcbCursorCacheKey &k, uint seed) noexcept
 +{
 +    return (uint(k.shape) + uint(k.bitmapCacheKey) + uint(k.maskCacheKey)) ^ seed;
 +}
@@ -1294,7 +1286,7 @@ index 0000000..5bc8063
 +    QPoint pos() const override;
 +    void setPos(const QPoint &pos) override;
 +
-+    static void queryPointer(QXcbConnection *c, QXcbVirtualDesktop **virtualDesktop, QPoint *pos, int *keybMask = 0);
++    static void queryPointer(QXcbConnection *c, QXcbVirtualDesktop **virtualDesktop, QPoint *pos, int *keybMask = nullptr);
 +
 +#ifndef QT_NO_CURSOR
 +    xcb_cursor_t xcbCursor(const QCursor &c) const
@@ -1338,12 +1330,12 @@ index 0000000..5bc8063
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbdrag.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbdrag.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbdrag.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbdrag.h
 new file mode 100644
-index 0000000..c19008c
+index 0000000..0d16afc
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbdrag.h
-@@ -0,0 +1,185 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbdrag.h
+@@ -0,0 +1,198 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2016 The Qt Company Ltd.
@@ -1414,7 +1406,7 @@ index 0000000..c19008c
 +class QDrag;
 +class QShapedPixmapWindow;
 +
-+class QXcbDrag : public QXcbObject, public QBasicDrag
++class QXcbDrag : public QXcbObject, public QBasicDrag, public QXcbWindowEventListener
 +{
 +public:
 +    QXcbDrag(QXcbConnection *c);
@@ -1428,11 +1420,15 @@ index 0000000..c19008c
 +    void drop(const QPoint &globalPos, Qt::MouseButtons b, Qt::KeyboardModifiers mods) override;
 +    void endDrag() override;
 +
++    Qt::DropAction defaultAction(Qt::DropActions possibleActions, Qt::KeyboardModifiers modifiers) const override;
++
++    void handlePropertyNotifyEvent(const xcb_property_notify_event_t *event) override;
++
 +    void handleEnter(QPlatformWindow *window, const xcb_client_message_event_t *event, xcb_window_t proxy = 0);
 +    void handlePosition(QPlatformWindow *w, const xcb_client_message_event_t *event);
 +    void handleLeave(QPlatformWindow *w, const xcb_client_message_event_t *event);
 +    void handleDrop(QPlatformWindow *, const xcb_client_message_event_t *event,
-+                    Qt::MouseButtons b = 0, Qt::KeyboardModifiers mods = 0);
++                    Qt::MouseButtons b = { }, Qt::KeyboardModifiers mods = { });
 +
 +    void handleStatus(const xcb_client_message_event_t *event);
 +    void handleSelectionRequest(const xcb_selection_request_event_t *event);
@@ -1455,12 +1451,18 @@ index 0000000..c19008c
 +    void init();
 +
 +    void handle_xdnd_position(QPlatformWindow *w, const xcb_client_message_event_t *event,
-+                              Qt::MouseButtons b = 0, Qt::KeyboardModifiers mods = 0);
++                              Qt::MouseButtons b = { }, Qt::KeyboardModifiers mods = { });
 +    void handle_xdnd_status(const xcb_client_message_event_t *event);
 +    void send_leave();
 +
 +    Qt::DropAction toDropAction(xcb_atom_t atom) const;
++    Qt::DropActions toDropActions(const QVector<xcb_atom_t> &atoms) const;
 +    xcb_atom_t toXdndAction(Qt::DropAction a) const;
++
++    void readActionList();
++    void setActionList(Qt::DropAction requestedAction, Qt::DropActions supportedActions);
++    void startListeningForActionListChanges();
++    void stopListeningForActionListChanges();
 +
 +    QPointer<QWindow> initiatorWindow;
 +    QPointer<QWindow> currentWindow;
@@ -1505,6 +1507,9 @@ index 0000000..c19008c
 +
 +    QVector<xcb_atom_t> drag_types;
 +
++    QVector<xcb_atom_t> current_actions;
++    QVector<xcb_atom_t> drop_actions;
++
 +    struct Transaction
 +    {
 +        xcb_timestamp_t timestamp;
@@ -1529,11 +1534,11 @@ index 0000000..c19008c
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventdispatcher.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventdispatcher.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventdispatcher.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventdispatcher.h
 new file mode 100644
 index 0000000..ddf448c
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventdispatcher.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventdispatcher.h
 @@ -0,0 +1,114 @@
 +/****************************************************************************
 +**
@@ -1649,11 +1654,11 @@ index 0000000..ddf448c
 +QT_END_NAMESPACE
 +
 +#endif // QXCBEVENTDISPATCHER_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventqueue.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventqueue.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventqueue.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventqueue.h
 new file mode 100644
 index 0000000..11d0b8e
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbeventqueue.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbeventqueue.h
 @@ -0,0 +1,169 @@
 +/****************************************************************************
 +**
@@ -1824,11 +1829,11 @@ index 0000000..11d0b8e
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbexport.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbexport.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbexport.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbexport.h
 new file mode 100644
 index 0000000..4db23a9
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbexport.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbexport.h
 @@ -0,0 +1,55 @@
 +/****************************************************************************
 +**
@@ -1885,11 +1890,11 @@ index 0000000..4db23a9
 +QT_END_NAMESPACE
 +#endif //QXCBEXPORT_H
 +
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbimage.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbimage.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbimage.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbimage.h
 new file mode 100644
 index 0000000..d718089
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbimage.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbimage.h
 @@ -0,0 +1,62 @@
 +/****************************************************************************
 +**
@@ -1953,11 +1958,11 @@ index 0000000..d718089
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbintegration.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbintegration.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbintegration.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbintegration.h
 new file mode 100644
 index 0000000..571726c
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbintegration.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbintegration.h
 @@ -0,0 +1,150 @@
 +/****************************************************************************
 +**
@@ -2109,12 +2114,12 @@ index 0000000..571726c
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbkeyboard.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbkeyboard.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbkeyboard.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbkeyboard.h
 new file mode 100644
-index 0000000..f849059
+index 0000000..0ee08ae
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbkeyboard.h
-@@ -0,0 +1,171 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbkeyboard.h
+@@ -0,0 +1,141 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2016 The Qt Company Ltd.
@@ -2160,22 +2165,16 @@ index 0000000..f849059
 +#include "qxcbobject.h"
 +
 +#include <xcb/xcb_keysyms.h>
-+#if QT_CONFIG(xkb)
 +#define explicit dont_use_cxx_explicit
 +#include <xcb/xkb.h>
 +#undef explicit
-+#endif
 +
-+#include <xkbcommon/xkbcommon.h>
-+#if QT_CONFIG(xkb)
++#include <QtXkbCommonSupport/private/qxkbcommon_p.h>
 +#include <xkbcommon/xkbcommon-x11.h>
-+#endif
 +
 +#include <QEvent>
 +
 +QT_BEGIN_NAMESPACE
-+
-+class QWindow;
 +
 +class QXcbKeyboard : public QXcbObject
 +{
@@ -2184,6 +2183,7 @@ index 0000000..f849059
 +
 +    ~QXcbKeyboard();
 +
++    void initialize();
 +    void selectEvents();
 +
 +    void handleKeyPressEvent(const xcb_key_press_event_t *event);
@@ -2192,20 +2192,16 @@ index 0000000..f849059
 +    Qt::KeyboardModifiers translateModifiers(int s) const;
 +    void updateKeymap(xcb_mapping_notify_event_t *event);
 +    void updateKeymap();
-+    QList<int> possibleKeys(const QKeyEvent *e) const;
++    QList<int> possibleKeys(const QKeyEvent *event) const;
 +
-+    // when XKEYBOARD not present on the X server
 +    void updateXKBMods();
 +    xkb_mod_mask_t xkbModMask(quint16 state);
 +    void updateXKBStateFromCore(quint16 state);
-+#if QT_CONFIG(xcb_xinput)
 +    void updateXKBStateFromXI(void *modInfo, void *groupInfo);
-+#endif
-+#if QT_CONFIG(xkb)
-+    // when XKEYBOARD is present on the X server
++
 +    int coreDeviceId() const { return core_device_id; }
 +    void updateXKBState(xcb_xkb_state_notify_event_t *state);
-+#endif
++
 +    void handleStateChanges(xkb_state_component changedComponents);
 +
 +protected:
@@ -2213,23 +2209,15 @@ index 0000000..f849059
 +                        quint16 state, xcb_timestamp_t time, bool fromSendEvent);
 +
 +    void resolveMaskConflicts();
-+    QString lookupString(struct xkb_state *state, xcb_keycode_t code) const;
-+    QString lookupStringNoKeysymTransformations(xkb_keysym_t keysym) const;
-+    int keysymToQtKey(xcb_keysym_t keysym, Qt::KeyboardModifiers modifiers,
-+                      struct xkb_state *state, xcb_keycode_t code) const;
 +
 +    typedef QMap<xcb_keysym_t, int> KeysymModifierMap;
 +    struct xkb_keymap *keymapFromCore(const KeysymModifierMap &keysymMods);
 +
-+    // when XKEYBOARD not present on the X server
 +    void updateModifiers(const KeysymModifierMap &keysymMods);
 +    KeysymModifierMap keysymsToModifiers();
-+    // when XKEYBOARD is present on the X server
++
 +    void updateVModMapping();
 +    void updateVModToRModMapping();
-+
-+    xkb_keysym_t lookupLatinKeysym(xkb_keycode_t keycode) const;
-+    void checkForLatinLayout() const;
 +
 +private:
 +    bool m_config = false;
@@ -2246,7 +2234,6 @@ index 0000000..f849059
 +
 +    _mod_masks rmod_masks;
 +
-+    // when XKEYBOARD not present on the X server
 +    xcb_key_symbols_t *m_key_symbols = nullptr;
 +    struct _xkb_mods {
 +        xkb_mod_index_t shift;
@@ -2259,38 +2246,26 @@ index 0000000..f849059
 +        xkb_mod_index_t mod5;
 +    };
 +    _xkb_mods xkb_mods;
-+#if QT_CONFIG(xkb)
-+    // when XKEYBOARD is present on the X server
++
 +    _mod_masks vmod_masks;
 +    int core_device_id;
-+#endif
 +
-+    struct XKBStateDeleter {
-+        void operator()(struct xkb_state *state) const { return xkb_state_unref(state); }
-+    };
-+    struct XKBKeymapDeleter {
-+        void operator()(struct xkb_keymap *keymap) const { return xkb_keymap_unref(keymap); }
-+    };
-+    struct XKBContextDeleter {
-+        void operator()(struct xkb_context *context) const { return xkb_context_unref(context); }
-+    };
-+    using ScopedXKBState = std::unique_ptr<struct xkb_state, XKBStateDeleter>;
-+    using ScopedXKBKeymap = std::unique_ptr<struct xkb_keymap, XKBKeymapDeleter>;
-+    using ScopedXKBContext = std::unique_ptr<struct xkb_context, XKBContextDeleter>;
++    QXkbCommon::ScopedXKBState m_xkbState;
++    QXkbCommon::ScopedXKBKeymap m_xkbKeymap;
++    QXkbCommon::ScopedXKBContext m_xkbContext;
 +
-+    ScopedXKBState m_xkbState;
-+    ScopedXKBKeymap m_xkbKeymap;
-+    ScopedXKBContext m_xkbContext;
++    bool m_superAsMeta = false;
++    bool m_hyperAsMeta = false;
 +};
 +
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbmime.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbmime.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbmime.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbmime.h
 new file mode 100644
-index 0000000..f2136ec
+index 0000000..dcb4f6b
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbmime.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbmime.h
 @@ -0,0 +1,70 @@
 +/****************************************************************************
 +**
@@ -2354,19 +2329,19 @@ index 0000000..f2136ec
 +    static bool mimeDataForAtom(QXcbConnection *connection, xcb_atom_t a, QMimeData *mimeData, QByteArray *data,
 +                                xcb_atom_t *atomFormat, int *dataFormat);
 +    static QVariant mimeConvertToFormat(QXcbConnection *connection, xcb_atom_t a, const QByteArray &data, const QString &format,
-+                                        QVariant::Type requestedType, const QByteArray &encoding);
-+    static xcb_atom_t mimeAtomForFormat(QXcbConnection *connection, const QString &format, QVariant::Type requestedType,
++                                        QMetaType::Type requestedType, const QByteArray &encoding);
++    static xcb_atom_t mimeAtomForFormat(QXcbConnection *connection, const QString &format, QMetaType::Type requestedType,
 +                                        const QVector<xcb_atom_t> &atoms, QByteArray *requestedEncoding);
 +};
 +
 +QT_END_NAMESPACE
 +
 +#endif // QXCBMIME_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbnativeinterface.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbnativeinterface.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbnativeinterface.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbnativeinterface.h
 new file mode 100644
 index 0000000..4656f46
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbnativeinterface.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbnativeinterface.h
 @@ -0,0 +1,156 @@
 +/****************************************************************************
 +**
@@ -2524,11 +2499,11 @@ index 0000000..4656f46
 +QT_END_NAMESPACE
 +
 +#endif // QXCBNATIVEINTERFACE_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbobject.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbobject.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbobject.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbobject.h
 new file mode 100644
-index 0000000..1b98d93
+index 0000000..931bed9
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbobject.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbobject.h
 @@ -0,0 +1,64 @@
 +/****************************************************************************
 +**
@@ -2579,7 +2554,7 @@ index 0000000..1b98d93
 +class QXcbObject
 +{
 +public:
-+    QXcbObject(QXcbConnection *connection = 0) : m_connection(connection) {}
++    QXcbObject(QXcbConnection *connection = nullptr) : m_connection(connection) {}
 +
 +    void setConnection(QXcbConnection *connection) { m_connection = connection; }
 +    QXcbConnection *connection() const { return m_connection; }
@@ -2594,12 +2569,12 @@ index 0000000..1b98d93
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbscreen.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbscreen.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbscreen.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbscreen.h
 new file mode 100644
-index 0000000..ec3b07b
+index 0000000..79698b4
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbscreen.h
-@@ -0,0 +1,240 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbscreen.h
+@@ -0,0 +1,239 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2016 The Qt Company Ltd.
@@ -2763,7 +2738,7 @@ index 0000000..ec3b07b
 +    QImage::Format format() const override;
 +    QSizeF physicalSize() const override { return m_sizeMillimeters; }
 +    QDpi logicalDpi() const override;
-+    qreal pixelDensity() const override;
++    QDpi logicalBaseDpi() const override { return QDpi(96, 96); };
 +    QPlatformCursor *cursor() const override;
 +    qreal refreshRate() const override { return m_refreshRate; }
 +    Qt::ScreenOrientation orientation() const override { return m_orientation; }
@@ -2828,8 +2803,7 @@ index 0000000..ec3b07b
 +    QRect m_availableGeometry;
 +    Qt::ScreenOrientation m_orientation = Qt::PrimaryOrientation;
 +    QXcbCursor *m_cursor;
-+    int m_refreshRate = 60;
-+    int m_pixelDensity = 1;
++    qreal m_refreshRate = 60.0;
 +    QEdidParser m_edid;
 +};
 +
@@ -2840,12 +2814,12 @@ index 0000000..ec3b07b
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsessionmanager.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsessionmanager.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbsessionmanager.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbsessionmanager.h
 new file mode 100644
-index 0000000..0ad9445
+index 0000000..79c587b
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsessionmanager.h
-@@ -0,0 +1,96 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbsessionmanager.h
+@@ -0,0 +1,94 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2013 Teo Mrnjavac <teo@kde.org>
@@ -2933,8 +2907,6 @@ index 0000000..0ad9445
 +
 +private:
 +    QEventLoop *m_eventLoop;
-+
-+    Q_DISABLE_COPY(QXcbSessionManager)
 +};
 +
 +QT_END_NAMESPACE
@@ -2942,11 +2914,11 @@ index 0000000..0ad9445
 +#endif //QT_NO_SESSIONMANAGER
 +
 +#endif //QXCBSESSIONMANAGER_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsystemtraytracker.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsystemtraytracker.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbsystemtraytracker.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbsystemtraytracker.h
 new file mode 100644
 index 0000000..d2fc24c
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbsystemtraytracker.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbsystemtraytracker.h
 @@ -0,0 +1,85 @@
 +/****************************************************************************
 +**
@@ -3033,11 +3005,11 @@ index 0000000..d2fc24c
 +QT_END_NAMESPACE
 +
 +#endif // QXCBSYSTEMTRAYTRACKER_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkaninstance.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkaninstance.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkaninstance.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkaninstance.h
 new file mode 100644
 index 0000000..53f7345
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkaninstance.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkaninstance.h
 @@ -0,0 +1,76 @@
 +/****************************************************************************
 +**
@@ -3115,11 +3087,11 @@ index 0000000..53f7345
 +QT_END_NAMESPACE
 +
 +#endif // QXCBVULKANINSTANCE_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkanwindow.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkanwindow.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkanwindow.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkanwindow.h
 new file mode 100644
 index 0000000..43c9682
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbvulkanwindow.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbvulkanwindow.h
 @@ -0,0 +1,65 @@
 +/****************************************************************************
 +**
@@ -3186,12 +3158,12 @@ index 0000000..43c9682
 +QT_END_NAMESPACE
 +
 +#endif // QXCBVULKANWINDOW_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwindow.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwindow.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbwindow.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbwindow.h
 new file mode 100644
-index 0000000..8258cc2
+index 0000000..0cdc40f
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwindow.h
-@@ -0,0 +1,303 @@
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbwindow.h
+@@ -0,0 +1,305 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2016 The Qt Company Ltd.
@@ -3262,7 +3234,8 @@ index 0000000..8258cc2
 +        NetWmStateMaximizedVert = 0x10,
 +        NetWmStateModal = 0x20,
 +        NetWmStateStaysOnTop = 0x40,
-+        NetWmStateDemandsAttention = 0x80
++        NetWmStateDemandsAttention = 0x80,
++        NetWmStateHidden = 0x100
 +    };
 +
 +    Q_DECLARE_FLAGS(NetWmStates, NetWmState)
@@ -3301,8 +3274,8 @@ index 0000000..8258cc2
 +
 +    bool windowEvent(QEvent *event) override;
 +
-+    bool startSystemResize(const QPoint &pos, Qt::Corner corner) override;
-+    bool startSystemMove(const QPoint &pos) override;
++    bool startSystemResize(Qt::Edges edges) override;
++    bool startSystemMove() override;
 +
 +    void setOpacity(qreal level) override;
 +    void setMask(const QRegion &region) override;
@@ -3331,10 +3304,8 @@ index 0000000..8258cc2
 +    void handleFocusInEvent(const xcb_focus_in_event_t *event) override;
 +    void handleFocusOutEvent(const xcb_focus_out_event_t *event) override;
 +    void handlePropertyNotifyEvent(const xcb_property_notify_event_t *event) override;
-+#if QT_CONFIG(xcb_xinput)
 +    void handleXIMouseEvent(xcb_ge_event_t *, Qt::MouseEventSource source = Qt::MouseEventNotSynthesized) override;
 +    void handleXIEnterLeave(xcb_ge_event_t *) override;
-+#endif
 +
 +    QXcbWindow *toWindow() override;
 +
@@ -3360,12 +3331,12 @@ index 0000000..8258cc2
 +    bool needsSync() const;
 +
 +    void postSyncWindowRequest();
-+    void clearSyncWindowRequest() { m_pendingSyncRequest = 0; }
++    void clearSyncWindowRequest() { m_pendingSyncRequest = nullptr; }
 +
 +    QXcbScreen *xcbScreen() const;
 +
-+    bool startSystemMoveResize(const QPoint &pos, int corner);
-+    void doStartSystemMoveResize(const QPoint &globalPos, int corner);
++    bool startSystemMoveResize(const QPoint &pos, int edges);
++    void doStartSystemMoveResize(const QPoint &globalPos, int edges);
 +
 +    static bool isTrayIconWindow(QWindow *window)
 +    {
@@ -3460,6 +3431,7 @@ index 0000000..8258cc2
 +
 +    QRegion m_exposeRegion;
 +    QSize m_oldWindowSize;
++    QPoint m_lastPointerPosition;
 +
 +    xcb_visualid_t m_visualId = 0;
 +    // Last sent state. Initialized to an invalid state, on purpose.
@@ -3474,6 +3446,8 @@ index 0000000..8258cc2
 +
 +    QXcbSyncWindowRequest *m_pendingSyncRequest = nullptr;
 +    int m_swapInterval = -1;
++
++    qreal m_sizeHintsScaleFactor = 1.0;
 +};
 +
 +class QXcbForeignWindow : public QXcbWindow
@@ -3495,11 +3469,11 @@ index 0000000..8258cc2
 +Q_DECLARE_METATYPE(QXcbWindow*)
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwmsupport.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwmsupport.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbwmsupport.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbwmsupport.h
 new file mode 100644
 index 0000000..b5de5b7
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbwmsupport.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbwmsupport.h
 @@ -0,0 +1,68 @@
 +/****************************************************************************
 +**
@@ -3569,250 +3543,11 @@ index 0000000..b5de5b7
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxkbcommon.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxkbcommon.h
-new file mode 100644
-index 0000000..422c0c0
---- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxkbcommon.h
-@@ -0,0 +1,233 @@
-+/****************************************************************************
-+**
-+** Copyright (C) 2018 The Qt Company Ltd.
-+** Contact: https://www.qt.io/licensing/
-+**
-+** This file is part of the plugins of the Qt Toolkit.
-+**
-+** $QT_BEGIN_LICENSE:LGPL$
-+** Commercial License Usage
-+** Licensees holding valid commercial Qt licenses may use this file in
-+** accordance with the commercial license agreement provided with the
-+** Software or, alternatively, in accordance with the terms contained in
-+** a written agreement between you and The Qt Company. For licensing terms
-+** and conditions see https://www.qt.io/terms-conditions. For further
-+** information use the contact form at https://www.qt.io/contact-us.
-+**
-+** GNU Lesser General Public License Usage
-+** Alternatively, this file may be used under the terms of the GNU Lesser
-+** General Public License version 3 as published by the Free Software
-+** Foundation and appearing in the file LICENSE.LGPL3 included in the
-+** packaging of this file. Please review the following information to
-+** ensure the GNU Lesser General Public License version 3 requirements
-+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-+**
-+** GNU General Public License Usage
-+** Alternatively, this file may be used under the terms of the GNU
-+** General Public License version 2.0 or (at your option) the GNU General
-+** Public license version 3 or any later version approved by the KDE Free
-+** Qt Foundation. The licenses are as published by the Free Software
-+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-+** included in the packaging of this file. Please review the following
-+** information to ensure the GNU General Public License requirements will
-+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-+** https://www.gnu.org/licenses/gpl-3.0.html.
-+**
-+** $QT_END_LICENSE$
-+**
-+****************************************************************************/
-+
-+/* XConvertCase was copied from src/3rdparty/xkbcommon/src/keysym.c,
-+   which contains the following license information:
-+
-+   Copyright 1985, 1987, 1990, 1998  The Open Group
-+
-+   Permission is hereby granted, free of charge, to any person obtaining a
-+   copy of this software and associated documentation files (the "Software"),
-+   to deal in the Software without restriction, including without limitation
-+   the rights to use, copy, modify, merge, publish, distribute, sublicense,
-+   and/or sell copies of the Software, and to permit persons to whom the
-+   Software is furnished to do so, subject to the following conditions:
-+
-+   The above copyright notice and this permission notice shall be included in
-+   all copies or substantial portions of the Software.
-+
-+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-+   AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-+   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-+   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-+
-+   Except as contained in this notice, the names of the authors or their
-+   institutions shall not be used in advertising or otherwise to promote the
-+   sale, use or other dealings in this Software without prior written
-+   authorization from the authors.
-+
-+
-+
-+   Copyright © 2009 Dan Nicholson
-+
-+   Permission is hereby granted, free of charge, to any person obtaining a
-+   copy of this software and associated documentation files (the "Software"),
-+   to deal in the Software without restriction, including without limitation
-+   the rights to use, copy, modify, merge, publish, distribute, sublicense,
-+   and/or sell copies of the Software, and to permit persons to whom the
-+   Software is furnished to do so, subject to the following conditions:
-+
-+   The above copyright notice and this permission notice (including the next
-+   paragraph) shall be included in all copies or substantial portions of the
-+   Software.
-+
-+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-+   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-+   DEALINGS IN THE SOFTWARE.
-+*/
-+
-+/*
-+ The following code modifications were applied:
-+
-+ XConvertCase() was renamed to xkbcommon_XConvertCase(), to not confuse it
-+ with Xlib's XConvertCase().
-+
-+ UCSConvertCase() was renamed to qt_UCSConvertCase() and function's body was
-+ replaced to use Qt APIs for doing case conversion, which should give us better
-+ results instead of using the less complete version from keysym.c
-+*/
-+
-+#include <xkbcommon/xkbcommon.h>
-+#include <QtCore/QChar>
-+
-+QT_BEGIN_NAMESPACE
-+
-+static void qt_UCSConvertCase(uint32_t code, xkb_keysym_t *lower, xkb_keysym_t *upper)
-+{
-+    *lower = QChar::toLower(code);
-+    *upper = QChar::toUpper(code);
-+}
-+
-+void xkbcommon_XConvertCase(xkb_keysym_t sym, xkb_keysym_t *lower, xkb_keysym_t *upper)
-+{
-+    /* Latin 1 keysym */
-+    if (sym < 0x100) {
-+        qt_UCSConvertCase(sym, lower, upper);
-+        return;
-+    }
-+
-+    /* Unicode keysym */
-+    if ((sym & 0xff000000) == 0x01000000) {
-+        qt_UCSConvertCase((sym & 0x00ffffff), lower, upper);
-+        *upper |= 0x01000000;
-+        *lower |= 0x01000000;
-+        return;
-+    }
-+
-+    /* Legacy keysym */
-+
-+    *lower = sym;
-+    *upper = sym;
-+
-+    switch (sym >> 8) {
-+    case 1: /* Latin 2 */
-+        /* Assume the KeySym is a legal value (ignore discontinuities) */
-+        if (sym == XKB_KEY_Aogonek)
-+            *lower = XKB_KEY_aogonek;
-+        else if (sym >= XKB_KEY_Lstroke && sym <= XKB_KEY_Sacute)
-+            *lower += (XKB_KEY_lstroke - XKB_KEY_Lstroke);
-+        else if (sym >= XKB_KEY_Scaron && sym <= XKB_KEY_Zacute)
-+            *lower += (XKB_KEY_scaron - XKB_KEY_Scaron);
-+        else if (sym >= XKB_KEY_Zcaron && sym <= XKB_KEY_Zabovedot)
-+            *lower += (XKB_KEY_zcaron - XKB_KEY_Zcaron);
-+        else if (sym == XKB_KEY_aogonek)
-+            *upper = XKB_KEY_Aogonek;
-+        else if (sym >= XKB_KEY_lstroke && sym <= XKB_KEY_sacute)
-+            *upper -= (XKB_KEY_lstroke - XKB_KEY_Lstroke);
-+        else if (sym >= XKB_KEY_scaron && sym <= XKB_KEY_zacute)
-+            *upper -= (XKB_KEY_scaron - XKB_KEY_Scaron);
-+        else if (sym >= XKB_KEY_zcaron && sym <= XKB_KEY_zabovedot)
-+            *upper -= (XKB_KEY_zcaron - XKB_KEY_Zcaron);
-+        else if (sym >= XKB_KEY_Racute && sym <= XKB_KEY_Tcedilla)
-+            *lower += (XKB_KEY_racute - XKB_KEY_Racute);
-+        else if (sym >= XKB_KEY_racute && sym <= XKB_KEY_tcedilla)
-+            *upper -= (XKB_KEY_racute - XKB_KEY_Racute);
-+        break;
-+    case 2: /* Latin 3 */
-+        /* Assume the KeySym is a legal value (ignore discontinuities) */
-+        if (sym >= XKB_KEY_Hstroke && sym <= XKB_KEY_Hcircumflex)
-+            *lower += (XKB_KEY_hstroke - XKB_KEY_Hstroke);
-+        else if (sym >= XKB_KEY_Gbreve && sym <= XKB_KEY_Jcircumflex)
-+            *lower += (XKB_KEY_gbreve - XKB_KEY_Gbreve);
-+        else if (sym >= XKB_KEY_hstroke && sym <= XKB_KEY_hcircumflex)
-+            *upper -= (XKB_KEY_hstroke - XKB_KEY_Hstroke);
-+        else if (sym >= XKB_KEY_gbreve && sym <= XKB_KEY_jcircumflex)
-+            *upper -= (XKB_KEY_gbreve - XKB_KEY_Gbreve);
-+        else if (sym >= XKB_KEY_Cabovedot && sym <= XKB_KEY_Scircumflex)
-+            *lower += (XKB_KEY_cabovedot - XKB_KEY_Cabovedot);
-+        else if (sym >= XKB_KEY_cabovedot && sym <= XKB_KEY_scircumflex)
-+            *upper -= (XKB_KEY_cabovedot - XKB_KEY_Cabovedot);
-+        break;
-+    case 3: /* Latin 4 */
-+        /* Assume the KeySym is a legal value (ignore discontinuities) */
-+        if (sym >= XKB_KEY_Rcedilla && sym <= XKB_KEY_Tslash)
-+            *lower += (XKB_KEY_rcedilla - XKB_KEY_Rcedilla);
-+        else if (sym >= XKB_KEY_rcedilla && sym <= XKB_KEY_tslash)
-+            *upper -= (XKB_KEY_rcedilla - XKB_KEY_Rcedilla);
-+        else if (sym == XKB_KEY_ENG)
-+            *lower = XKB_KEY_eng;
-+        else if (sym == XKB_KEY_eng)
-+            *upper = XKB_KEY_ENG;
-+        else if (sym >= XKB_KEY_Amacron && sym <= XKB_KEY_Umacron)
-+            *lower += (XKB_KEY_amacron - XKB_KEY_Amacron);
-+        else if (sym >= XKB_KEY_amacron && sym <= XKB_KEY_umacron)
-+            *upper -= (XKB_KEY_amacron - XKB_KEY_Amacron);
-+        break;
-+    case 6: /* Cyrillic */
-+        /* Assume the KeySym is a legal value (ignore discontinuities) */
-+        if (sym >= XKB_KEY_Serbian_DJE && sym <= XKB_KEY_Serbian_DZE)
-+            *lower -= (XKB_KEY_Serbian_DJE - XKB_KEY_Serbian_dje);
-+        else if (sym >= XKB_KEY_Serbian_dje && sym <= XKB_KEY_Serbian_dze)
-+            *upper += (XKB_KEY_Serbian_DJE - XKB_KEY_Serbian_dje);
-+        else if (sym >= XKB_KEY_Cyrillic_YU && sym <= XKB_KEY_Cyrillic_HARDSIGN)
-+            *lower -= (XKB_KEY_Cyrillic_YU - XKB_KEY_Cyrillic_yu);
-+        else if (sym >= XKB_KEY_Cyrillic_yu && sym <= XKB_KEY_Cyrillic_hardsign)
-+            *upper += (XKB_KEY_Cyrillic_YU - XKB_KEY_Cyrillic_yu);
-+        break;
-+    case 7: /* Greek */
-+        /* Assume the KeySym is a legal value (ignore discontinuities) */
-+        if (sym >= XKB_KEY_Greek_ALPHAaccent && sym <= XKB_KEY_Greek_OMEGAaccent)
-+            *lower += (XKB_KEY_Greek_alphaaccent - XKB_KEY_Greek_ALPHAaccent);
-+        else if (sym >= XKB_KEY_Greek_alphaaccent && sym <= XKB_KEY_Greek_omegaaccent &&
-+             sym != XKB_KEY_Greek_iotaaccentdieresis &&
-+             sym != XKB_KEY_Greek_upsilonaccentdieresis)
-+            *upper -= (XKB_KEY_Greek_alphaaccent - XKB_KEY_Greek_ALPHAaccent);
-+        else if (sym >= XKB_KEY_Greek_ALPHA && sym <= XKB_KEY_Greek_OMEGA)
-+            *lower += (XKB_KEY_Greek_alpha - XKB_KEY_Greek_ALPHA);
-+        else if (sym >= XKB_KEY_Greek_alpha && sym <= XKB_KEY_Greek_omega &&
-+             sym != XKB_KEY_Greek_finalsmallsigma)
-+            *upper -= (XKB_KEY_Greek_alpha - XKB_KEY_Greek_ALPHA);
-+        break;
-+    case 0x13: /* Latin 9 */
-+        if (sym == XKB_KEY_OE)
-+            *lower = XKB_KEY_oe;
-+        else if (sym == XKB_KEY_oe)
-+            *upper = XKB_KEY_OE;
-+        else if (sym == XKB_KEY_Ydiaeresis)
-+            *lower = XKB_KEY_ydiaeresis;
-+        break;
-+    }
-+}
-+
-+xkb_keysym_t xkbcommon_xkb_keysym_to_upper(xkb_keysym_t ks)
-+{
-+    xkb_keysym_t lower, upper;
-+
-+    xkbcommon_XConvertCase(ks, &lower, &upper);
-+
-+    return upper;
-+}
-+
-+QT_END_NAMESPACE
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxsettings.h b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxsettings.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.15.1/qxcbxsettings.h b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbxsettings.h
 new file mode 100644
 index 0000000..ab1f784
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.12.5/qxcbxsettings.h
++++ b/xcb/libqt5xcbqpa-dev/5.15.1/qxcbxsettings.h
 @@ -0,0 +1,71 @@
 +/****************************************************************************
 +**
@@ -3885,3 +3620,6 @@ index 0000000..ab1f784
 +QT_END_NAMESPACE
 +
 +#endif // QXCBXSETTINGS_H
+-- 
+2.27.0
+

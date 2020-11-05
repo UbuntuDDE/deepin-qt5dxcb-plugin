@@ -10,7 +10,7 @@ Build-Depends:
  debhelper-compat (= 13),
  libcairo2-dev,
  libdbus-1-dev,
- libdtkcore-dev (>= 2.0.5.2-2~),
+ libdtkcore-dev (>= 5.2~),
  libegl1-mesa-dev,
  libfontconfig1-dev,
  libfreetype6-dev,
@@ -52,25 +52,8 @@ Conflicts:
  libqt5dxcb-plugin,
 Breaks:
  dde-qt5integration (<< 0.2.8.1),
-Depends:
- ${misc:Depends},
- ${shlibs:Depends},
-Multi-Arch: same
-Description: Qt platform theme integration plugin for DDE
- Deepin's qt5dxcb-plugin is the Qt platform integration plugin for Deepin
- Desktop Environment. It provides an abstract interface between Deepin
- applications and Qt tookit for further application theme customization.
- .
- This package is part of DDE (Deepin Desktop Environment).
-
-Package: qt5dxcb-plugin
-Architecture: any
-Provides:
- libqt5dxcb-plugin,
-Conflicts:
- libqt5dxcb-plugin,
-Breaks:
- dde-qt5integration (<< 0.2.8.1),
+Replaces:
+ qt5dxcb-plugin,
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},

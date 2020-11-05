@@ -3,20 +3,20 @@ Date: Sat, 6 Jun 2020 21:28:48 +0300
 Subject: libqt5xcbqpa-dev: Add support for Qt 5.14.2
 
 ---
- platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbatom.h  | 258 +++++++++++++
+ xcb/libqt5xcbqpa-dev/5.14.2/qxcbatom.h  | 258 +++++++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h     | 116 ++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h        | 152 ++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbconnection.h       | 417 +++++++++++++++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h | 181 +++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbcursor.h           | 129 +++++++
- platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h  | 185 +++++++++
+ xcb/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h  | 185 +++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h  | 114 ++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h       | 169 +++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbexport.h           |  55 +++
- platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbimage.h |  62 +++
+ xcb/libqt5xcbqpa-dev/5.14.2/qxcbimage.h |  62 +++
  .../libqt5xcbqpa-dev/5.14.2/qxcbintegration.h      | 150 ++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h         | 151 ++++++++
- platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbmime.h  |  70 ++++
+ xcb/libqt5xcbqpa-dev/5.14.2/qxcbmime.h  |  70 ++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h  | 156 ++++++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbobject.h           |  64 ++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbscreen.h           | 239 ++++++++++++
@@ -28,36 +28,36 @@ Subject: libqt5xcbqpa-dev: Add support for Qt 5.14.2
  .../libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h        |  68 ++++
  .../libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h        |  71 ++++
  24 files changed, 3433 insertions(+)
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbatom.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbexport.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbimage.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbmime.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbobject.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h
- create mode 100644 platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbatom.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbexport.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbimage.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbmime.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbobject.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h
+ create mode 100644 xcb/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h
 
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbatom.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbatom.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbatom.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbatom.h
 new file mode 100644
 index 0000000..80b5887
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbatom.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbatom.h
 @@ -0,0 +1,258 @@
 +/****************************************************************************
 +**
@@ -317,11 +317,11 @@ index 0000000..80b5887
 +};
 +
 +#endif // QXCBATOM_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h
 new file mode 100644
 index 0000000..0c30929
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbbackingstore.h
 @@ -0,0 +1,116 @@
 +/****************************************************************************
 +**
@@ -439,11 +439,11 @@ index 0000000..0c30929
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h
 new file mode 100644
 index 0000000..51ae0dc
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbclipboard.h
 @@ -0,0 +1,152 @@
 +/****************************************************************************
 +**
@@ -597,11 +597,11 @@ index 0000000..51ae0dc
 +QT_END_NAMESPACE
 +
 +#endif // QXCBCLIPBOARD_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h
 new file mode 100644
 index 0000000..7cf25d4
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection.h
 @@ -0,0 +1,417 @@
 +/****************************************************************************
 +**
@@ -1020,11 +1020,11 @@ index 0000000..7cf25d4
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h
 new file mode 100644
 index 0000000..1bd4310
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbconnection_basic.h
 @@ -0,0 +1,181 @@
 +/****************************************************************************
 +**
@@ -1207,11 +1207,11 @@ index 0000000..1bd4310
 +QT_END_NAMESPACE
 +
 +#endif // QXCBBASICCONNECTION_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h
 new file mode 100644
 index 0000000..0b23882
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbcursor.h
 @@ -0,0 +1,129 @@
 +/****************************************************************************
 +**
@@ -1342,11 +1342,11 @@ index 0000000..0b23882
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h
 new file mode 100644
 index 0000000..1388e68
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbdrag.h
 @@ -0,0 +1,185 @@
 +/****************************************************************************
 +**
@@ -1533,11 +1533,11 @@ index 0000000..1388e68
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h
 new file mode 100644
 index 0000000..ddf448c
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventdispatcher.h
 @@ -0,0 +1,114 @@
 +/****************************************************************************
 +**
@@ -1653,11 +1653,11 @@ index 0000000..ddf448c
 +QT_END_NAMESPACE
 +
 +#endif // QXCBEVENTDISPATCHER_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h
 new file mode 100644
 index 0000000..11d0b8e
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbeventqueue.h
 @@ -0,0 +1,169 @@
 +/****************************************************************************
 +**
@@ -1828,11 +1828,11 @@ index 0000000..11d0b8e
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbexport.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbexport.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbexport.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbexport.h
 new file mode 100644
 index 0000000..4db23a9
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbexport.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbexport.h
 @@ -0,0 +1,55 @@
 +/****************************************************************************
 +**
@@ -1889,11 +1889,11 @@ index 0000000..4db23a9
 +QT_END_NAMESPACE
 +#endif //QXCBEXPORT_H
 +
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbimage.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbimage.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbimage.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbimage.h
 new file mode 100644
 index 0000000..d718089
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbimage.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbimage.h
 @@ -0,0 +1,62 @@
 +/****************************************************************************
 +**
@@ -1957,11 +1957,11 @@ index 0000000..d718089
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h
 new file mode 100644
 index 0000000..571726c
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbintegration.h
 @@ -0,0 +1,150 @@
 +/****************************************************************************
 +**
@@ -2113,11 +2113,11 @@ index 0000000..571726c
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h
 new file mode 100644
 index 0000000..e35c82a
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbkeyboard.h
 @@ -0,0 +1,151 @@
 +/****************************************************************************
 +**
@@ -2270,11 +2270,11 @@ index 0000000..e35c82a
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbmime.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbmime.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbmime.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbmime.h
 new file mode 100644
 index 0000000..f2136ec
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbmime.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbmime.h
 @@ -0,0 +1,70 @@
 +/****************************************************************************
 +**
@@ -2346,11 +2346,11 @@ index 0000000..f2136ec
 +QT_END_NAMESPACE
 +
 +#endif // QXCBMIME_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h
 new file mode 100644
 index 0000000..4656f46
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbnativeinterface.h
 @@ -0,0 +1,156 @@
 +/****************************************************************************
 +**
@@ -2508,11 +2508,11 @@ index 0000000..4656f46
 +QT_END_NAMESPACE
 +
 +#endif // QXCBNATIVEINTERFACE_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbobject.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbobject.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbobject.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbobject.h
 new file mode 100644
 index 0000000..931bed9
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbobject.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbobject.h
 @@ -0,0 +1,64 @@
 +/****************************************************************************
 +**
@@ -2578,11 +2578,11 @@ index 0000000..931bed9
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h
 new file mode 100644
 index 0000000..79698b4
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbscreen.h
 @@ -0,0 +1,239 @@
 +/****************************************************************************
 +**
@@ -2823,11 +2823,11 @@ index 0000000..79698b4
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h
 new file mode 100644
 index 0000000..79c587b
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbsessionmanager.h
 @@ -0,0 +1,94 @@
 +/****************************************************************************
 +**
@@ -2923,11 +2923,11 @@ index 0000000..79c587b
 +#endif //QT_NO_SESSIONMANAGER
 +
 +#endif //QXCBSESSIONMANAGER_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h
 new file mode 100644
 index 0000000..d2fc24c
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbsystemtraytracker.h
 @@ -0,0 +1,85 @@
 +/****************************************************************************
 +**
@@ -3014,11 +3014,11 @@ index 0000000..d2fc24c
 +QT_END_NAMESPACE
 +
 +#endif // QXCBSYSTEMTRAYTRACKER_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h
 new file mode 100644
 index 0000000..53f7345
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkaninstance.h
 @@ -0,0 +1,76 @@
 +/****************************************************************************
 +**
@@ -3096,11 +3096,11 @@ index 0000000..53f7345
 +QT_END_NAMESPACE
 +
 +#endif // QXCBVULKANINSTANCE_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h
 new file mode 100644
 index 0000000..43c9682
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbvulkanwindow.h
 @@ -0,0 +1,65 @@
 +/****************************************************************************
 +**
@@ -3167,11 +3167,11 @@ index 0000000..43c9682
 +QT_END_NAMESPACE
 +
 +#endif // QXCBVULKANWINDOW_H
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h
 new file mode 100644
 index 0000000..b84250d
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbwindow.h
 @@ -0,0 +1,306 @@
 +/****************************************************************************
 +**
@@ -3479,11 +3479,11 @@ index 0000000..b84250d
 +Q_DECLARE_METATYPE(QXcbWindow*)
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h
 new file mode 100644
 index 0000000..b5de5b7
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbwmsupport.h
 @@ -0,0 +1,68 @@
 +/****************************************************************************
 +**
@@ -3553,11 +3553,11 @@ index 0000000..b5de5b7
 +QT_END_NAMESPACE
 +
 +#endif
-diff --git a/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h
+diff --git a/xcb/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h
 new file mode 100644
 index 0000000..ab1f784
 --- /dev/null
-+++ b/platformplugin/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h
++++ b/xcb/libqt5xcbqpa-dev/5.14.2/qxcbxsettings.h
 @@ -0,0 +1,71 @@
 +/****************************************************************************
 +**
