@@ -1,6 +1,7 @@
 From: Arun Kumar Pariyar <openarungeek@gmail.com>
 Date: Thu, 26 Nov 2020 01:27:42 +0545
 Subject: [PATCH] libqt5xcbqpa-dev-Add-support-for-Qt-5.15.2
+Forwarded: https://github.com/linuxdeepin/qt5platform-plugins/pull/52
 
 ---
  xcb/libqt5xcbqpa-dev/5.15.2/qxcbatom.h        | 259 +++++++++++

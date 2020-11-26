@@ -17,7 +17,7 @@ deepin-qt5dxcb-plugin (5.0.17+ds.1-1~exp1) experimental; urgency=medium
     + Drop patch libqt5xcbqpa-dev-Add-support-for-Qt-5.12.5
       as its already patched by upstream.
   * debian/copyright: Update license information.
-  * debia/README.source: Update that wayland support was dropped.
+  * debian/README.source: Update that wayland support was dropped.
 
  -- Arun Kumar Pariyar <openarungeek@gmail.com>  Thu, 26 Nov 2020 01:32:50 +0545
 
