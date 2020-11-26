@@ -10,14 +10,16 @@ deepin-qt5dxcb-plugin (5.0.17+ds.1-1~exp1) experimental; urgency=medium
     + Bump debhelper-compat to v13.
     + Add Arun Kumar Pariyar to Uploaders.
     + Replace qt5dxcb-plugin with dde-qt5xcb-plugin.
+    + Add libxcb-util0-dev to build dependency.
   * debian/patches:
     + Add patch for Qt 5.15.1 support.
+    + Add patch for Qt 5.15.2 support.
     + Drop patch libqt5xcbqpa-dev-Add-support-for-Qt-5.12.5
       as its already patched by upstream.
   * debian/copyright: Update license information.
   * debia/README.source: Update that wayland support was dropped.
 
- -- Arun Kumar Pariyar <openarungeek@gmail.com>  Thu, 05 Nov 2020 19:47:38 +0545
+ -- Arun Kumar Pariyar <openarungeek@gmail.com>  Thu, 26 Nov 2020 01:32:50 +0545
 
 deepin-qt5dxcb-plugin (5.0.1-3) unstable; urgency=high
 

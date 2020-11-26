@@ -35,6 +35,7 @@ Build-Depends:
  libxi-dev,
  libxkbcommon-x11-dev,
  libxrender-dev,
+ libxcb-util0-dev,
  pkg-config,
  qtbase5-dev,
  qtbase5-private-dev,
