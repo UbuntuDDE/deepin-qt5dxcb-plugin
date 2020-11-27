@@ -1,8 +1,5 @@
 deepin-qt5dxcb-plugin (5.0.17+ds.1-1~exp1) experimental; urgency=medium
 
-  [ Dmitry Shachnev ]
-  * debian/patches: Add a patch for Qt 5.14.2 support.
-
   [ Arun Kumar Pariyar ]
   * New upstream release 5.0.17.
   * debian/control:
