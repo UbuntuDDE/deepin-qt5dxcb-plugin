@@ -5,6 +5,7 @@ Maintainer: Debian Deepin Packaging Team <pkg-deepin-devel@lists.alioth.debian.o
 Uploaders:
  Boyuan Yang <byang@debian.org>,
  Yanhao Mo <yanhaocs@gmail.com>,
+ Arun Kumar Pariyar <openarungeek@gmail.com>,
 Build-Depends:
  debhelper-compat (= 12),
  libcairo2-dev,
