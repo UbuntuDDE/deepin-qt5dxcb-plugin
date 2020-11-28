@@ -1,0 +1,14 @@
+Description: Disable wayland.
+Author: Arun Kumar Pariyar <openarungeek@gmail.com>
+Last-Update: 2020-11-28
+---
+
+--- deepin-qt5dxcb-plugin-5.0.17.orig/qt5platform-plugins.pro
++++ deepin-qt5dxcb-plugin-5.0.17/qt5platform-plugins.pro
+@@ -1,4 +1,3 @@
+ TEMPLATE = subdirs
+ SUBDIRS += \
+-    xcb/xcb.pro \
+-    wayland/wayland.pro
++    xcb/xcb.pro
+\ No newline at end of file

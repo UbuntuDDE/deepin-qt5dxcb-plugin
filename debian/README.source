@@ -1,10 +1,6 @@
 Removed wayland support
 -----------------------
 Wayland support was dropped because dde-wayland is not ready yet.
-The source code taken from the tarball of upstream release as 5.0.17
-and then the wayland support was dropped as follows:
-  * Removal of wayland/ directory from the upstream's root directoy.
-  * Removal of wayland/wayland.pro from qt5platform-plugins.pro.
 
  -- Arun Kumar Pariyar <openarungeek@gmail.com>  Thu, 05 Nov 2020 19:47:38 +0545
 

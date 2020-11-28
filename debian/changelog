@@ -1,4 +1,4 @@
-deepin-qt5dxcb-plugin (5.0.17+ds.1-1~exp1) experimental; urgency=medium
+deepin-qt5dxcb-plugin (5.0.17-1~exp1) experimental; urgency=medium
 
   * New upstream release 5.0.17.
   * debian/control:
@@ -9,10 +9,12 @@ deepin-qt5dxcb-plugin (5.0.17+ds.1-1~exp1) experimental; urgency=medium
   * debian/patches:
     + Add patch for Qt 5.15.1 support.
     + Add patch for Qt 5.15.2 support. (Closes: #975730)
+    + Add patch to disable wayland support.
     + Drop patch libqt5xcbqpa-dev-Add-support-for-Qt-5.12.5
       as its already patched by upstream.
+  * debian/clean: Add wayland/ directory.
   * debian/copyright: Update license information.
-  * debian/README.source: Update that wayland support was dropped.
+  * debian/README.source: Update that wayland support is dropped.
 
  -- Arun Kumar Pariyar <openarungeek@gmail.com>  Thu, 26 Nov 2020 01:32:50 +0545
 

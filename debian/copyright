@@ -2,8 +2,6 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: qt5platform-plugins
 Upstream-Contact: https://github.com/linuxdeepin/qt5platform-plugins/issues
 Source: https://github.com/linuxdeepin/qt5platform-plugins
-Comment: Disable wayland support.
-Files-Excluded: wayland
 
 Files: *
 Copyright: 2016-2020 Deepin Technology Co., Ltd. <support@deepin.com>
@@ -26,14 +24,98 @@ Files:
 Copyright: 2016 The Qt Company Ltd.
 License: LGPL-3 or GPL-2+ or GPL-3+
 
-Files: xcb/3rdparty/clientwin.*
+Files:
+ xcb/3rdparty/clientwin.*
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-text-input-unstable-v2-client-protocol.h
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-wayland-client-protocol.h
 Copyright: 2007 Kim woelders
+           2015-2016 Jan Arne Petersen
+           2010-2013 Intel Corporation
+           2012-2013 Collabora, Ltd.
+           2008-2011 Kristian Høgsberg
 License: HPND-sell-variant
 
 Files: xcb/3rdparty/dsimple.*
 Copyright: 1993-1998, The Open Group
            2010 Oracle and/or its affiliates.
 License: Expat and MIT-open-group
+
+Files:
+ wayland/dwayland/dwaylandintegration.*
+ wayland/dwayland/dwaylandinterfacehook.*
+ wayland/dwayland/main.cpp
+Copyright: 2017-2020 Deepin Technology Co., Ltd. <support@deepin.com>
+License: GPL-3+
+
+Files:
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandserverbufferintegrationfactory_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandinputdeviceintegrationplugin_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshellintegrationfactory_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddatadevice_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandclientbufferintegrationplugin_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddisplay_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandclientbufferintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandwindow_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshmwindow_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandsubsurface_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandserverbufferintegrationplugin_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandqtkey_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddataoffer_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandwindowmanagerintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddecorationplugin_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandinputdevice_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddatadevicemanager_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandabstractdecoration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandinputdeviceintegrationfactory_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qtwaylandclientglobal_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandserverbufferintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandcursor_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshm_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandwlshellintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddnd_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandbuffer_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshellintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshellintegrationplugin_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandtouch_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandextendedsurface_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandinputdeviceintegration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qtwaylandclientglobal.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddatasource_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandclientextension.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandnativeinterface_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshellsurface_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandclientbufferintegrationfactory_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandxdgshellv6integration_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylanddecorationfactory_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandclipboard_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandclientextension_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandscreen_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandinputcontext_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandshmbackingstore_p.h
+ wayland/qtwayland-dev/QtWaylandClient/private/qwaylandhardwareintegration_p.h
+Copyright: 2016-2017 The Qt Company Ltd.
+           2016 Robin Burchell <robin.burchell@viroteck.net>
+           2017 Erik Larsson.
+           2016 Klarälvdalens Datakonsult AB (KDAB) <info@kdab.com>
+           2016 LG Electronics Ltd.
+           2016 Jolla Ltd.
+           2016 LG Electronics Inc. <mikko.levonmaa@lge.com>
+License: LGPL-3 or GPL-2+ or GPL-3+
+
+Files:
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-hardware-integration-client-protocol.h
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-qt-key-unstable-v1-client-protocol.h
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-qt-windowmanager-client-protocol.h
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-server-buffer-extension-client-protocol.h
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-surface-extension-client-protocol.h
+ wayland/qtwayland-dev/QtWaylandClient/private/wayland-touch-extension-client-protocol.h
+Copyright: 2015-2018 The Qt Company Ltd.
+License: BSD-3-clause
+
+Files: wayland/qtwayland-dev/QtWaylandClient/private/wayland-xdg-output-unstable-v1-client-protocol.h
+Copyright: 2017 Red Hat Inc.
+License: Expat
 
 License: GPL-3+
  This package is free software; you can redistribute it and/or modify
@@ -146,3 +228,27 @@ License: MIT-open-group
  not be used in advertising or otherwise to promote the sale, use or
  other dealings in this Software without prior written authorization
  from The Open Group.
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ .
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
