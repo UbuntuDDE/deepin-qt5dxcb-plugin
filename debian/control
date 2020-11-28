@@ -45,7 +45,7 @@ Homepage: https://github.com/linuxdeepin/qt5platform-plugins
 Vcs-Git: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin.git
 Vcs-Browser: https://salsa.debian.org/pkg-deepin-team/deepin-qt5dxcb-plugin
 
-Package: qt5xcb-plugin
+Package: qt5dxcb-plugin
 Architecture: any
 Provides:
  libqt5dxcb-plugin,
