@@ -1,16 +1,14 @@
 deepin-qt5dxcb-plugin (5.0.17+ds.1-1~exp1) experimental; urgency=medium
 
-  [ Arun Kumar Pariyar ]
   * New upstream release 5.0.17.
   * debian/control:
     + Bump Standards-Version to 4.5.0.
     + Bump debhelper-compat to v13.
     + Add Arun Kumar Pariyar to Uploaders.
-    + Replace qt5dxcb-plugin with dde-qt5xcb-plugin.
     + Add libxcb-util0-dev to build dependency.
   * debian/patches:
     + Add patch for Qt 5.15.1 support.
-    + Add patch for Qt 5.15.2 support.
+    + Add patch for Qt 5.15.2 support. (Closes: #975730)
     + Drop patch libqt5xcbqpa-dev-Add-support-for-Qt-5.12.5
       as its already patched by upstream.
   * debian/copyright: Update license information.
