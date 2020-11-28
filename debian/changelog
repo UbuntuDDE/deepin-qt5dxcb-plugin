@@ -1,3 +1,10 @@
+deepin-qt5dxcb-plugin (5.0.1-3.2) UNRELEASED; urgency=medium
+
+  * Backport two upstream patches to fix build with Qt 5.15.1 (closes:
+    #972160).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sat, 24 Oct 2020 13:34:39 +0300
+
 deepin-qt5dxcb-plugin (5.0.1-3.1) unstable; urgency=medium
 
   * Non-maintainer upload.
