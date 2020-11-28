@@ -28,6 +28,7 @@ Build-Depends:
  libxcb-randr0-dev,
  libxcb-render-util0-dev,
  libxcb-sync-dev,
+ libxcb-util-dev,
  libxcb-xinerama0-dev,
  libxcb-xinput-dev,
  libxcb-xkb-dev,
