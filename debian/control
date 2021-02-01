@@ -6,6 +6,7 @@ Uploaders:
  Boyuan Yang <byang@debian.org>,
  Yanhao Mo <yanhaocs@gmail.com>,
  Arun Kumar Pariyar <openarungeek@gmail.com>,
+ Hu Feng <hufeng@uniontech.com>,
 Build-Depends:
  debhelper-compat (= 13),
  libcairo2-dev,
