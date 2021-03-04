@@ -1,9 +1,11 @@
 deepin-qt5dxcb-plugin (5.0.19-1~exp1) experimental; urgency=medium
 
   * New upstream release 5.0.19. 
-  * debian/control: Add Hu Feng to Upoladers.
+  * debian/control:
+    + Add Hu Feng to Upoladers.
+    + Delete libdtkcore-dev in Build-Depends.
 
- -- Hu Feng <hufeng@unionteh.com>  Mon, 01 Feb 2021 18:50:54 +0800
+ -- Hu Feng <hufeng@uniontech.com>  Thu, 04 Mar 2021 10:00:56 +0800
 
 deepin-qt5dxcb-plugin (5.0.17-1) unstable; urgency=medium
 
