@@ -1,3 +1,9 @@
+deepin-qt5dxcb-plugin (5.0.40-1) impish; urgency=medium
+
+  * New upstream release 5.0.40.
+
+ -- Arun Kumar Pariyar <openarungeek@gmail.com>  Sun, 19 Sep 2021 15:23:28 +0545
+
 deepin-qt5dxcb-plugin (5.0.21-1~exp1) experimental; urgency=medium
 
   [ Hu Feng ]
