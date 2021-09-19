@@ -23,7 +23,9 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_LINUX
+#define private protected
 #include "qxcbintegration.h"
+#undef private
 typedef QXcbIntegration DPlatformIntegrationParent;
 class QXcbVirtualDesktop;
 #elif defined(Q_OS_WIN)
@@ -38,6 +40,8 @@ class XcbNativeEventFilter;
 class DPlatformBackingStoreHelper;
 class DPlatformOpenGLContextHelper;
 class DXcbXSettings;
+class DApplicationEventMonitor;
+class DDesktopInputSelectionControl;
 
 class DPlatformIntegration : public DPlatformIntegrationParent
 {
@@ -57,6 +61,8 @@ public:
     // 无法使用QMetaObject::cast，不能使用QObject::findChild等接口查找子类，也不能使用qobject_cast转换对象指针类型
     static bool buildNativeSettings(QObject *object, quint32 settingWindow);
     static void clearNativeSettings(quint32 settingWindow);
+
+    static void setWMClassName(const QByteArray &name);
 
     QPlatformWindow *createPlatformWindow(QWindow *window) const Q_DECL_OVERRIDE;
     QPlatformBackingStore *createPlatformBackingStore(QWindow *window) const Q_DECL_OVERRIDE;
@@ -100,6 +106,8 @@ private:
 
     DPlatformBackingStoreHelper *m_storeHelper;
     DPlatformOpenGLContextHelper *m_contextHelper;
+    QScopedPointer<DApplicationEventMonitor> m_pApplicationEventMonitor;
+    QScopedPointer<DDesktopInputSelectionControl> m_pDesktopInputSelectionControl;
 };
 
 DPP_END_NAMESPACE

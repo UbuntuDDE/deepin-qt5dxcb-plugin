@@ -23,6 +23,8 @@
 #include "dnotitlebarwindowhelper.h"
 #include "dnativesettings.h"
 #include "dbackingstoreproxy.h"
+#include "ddesktopinputselectioncontrol.h"
+#include "dapplicationeventmonitor.h"
 
 #ifdef USE_NEW_IMPLEMENTING
 #include "dplatformwindowhelper.h"
@@ -43,6 +45,7 @@
 #include "windoweventhook.h"
 #include "xcbnativeeventfilter.h"
 #include "dplatformnativeinterfacehook.h"
+#include "dplatforminputcontexthook.h"
 #include "dxcbxsettings.h"
 #include "dhighdpi.h"
 
@@ -52,12 +55,6 @@
 #include <X11/cursorfont.h>
 #include <xcb/xcb_image.h>
 #include <xcb/xcb_renderutil.h>
-#endif
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 4, 0)
-#include <private/qwidgetwindow_qpa_p.h>
-#else
-#include <private/qwidgetwindow_p.h>
 #endif
 
 #include <QWidget>
@@ -71,7 +68,11 @@
 #include <private/qsimpledrag_p.h>
 #undef protected
 #include <qpa/qplatformnativeinterface.h>
+#include <qpa/qplatforminputcontext.h>
+#include <qpa/qplatformservices.h>
 #include <private/qpaintengine_raster_p.h>
+
+#include "im_interface.h"
 
 // https://www.freedesktop.org/wiki/Specifications/XSettingsRegistry/
 #define XSETTINGS_CURSOR_BLINK QByteArrayLiteral("Net/CursorBlink")
@@ -101,6 +102,7 @@ DPlatformIntegration::DPlatformIntegration(const QStringList &parameters, int &a
 #ifdef USE_NEW_IMPLEMENTING
     , m_storeHelper(new DPlatformBackingStoreHelper)
     , m_contextHelper(new DPlatformOpenGLContextHelper)
+    , m_pApplicationEventMonitor(nullptr)
 #endif
 {
 #ifdef Q_OS_LINUX
@@ -112,16 +114,19 @@ DPlatformIntegration::DPlatformIntegration(const QStringList &parameters, int &a
     VtableHook::overrideVfptrFun(nativeInterface(),
                                  &QPlatformNativeInterface::platformFunction,
                                  &DPlatformNativeInterfaceHook::platformFunction);
+
+    // 不仅仅需要在插件被加载时初始化, 也有可能DPlatformIntegration会被创建多次, 也应当在
+    // DPlatformIntegration每次被创建时都重新初始化DHighDpi.
+    DHighDpi::init();
 }
 
 DPlatformIntegration::~DPlatformIntegration()
 {
 #ifdef Q_OS_LINUX
-    if (!m_eventFilter)
-        return;
-
-    qApp->removeNativeEventFilter(m_eventFilter);
-    delete m_eventFilter;
+    if (m_eventFilter) {
+        qApp->removeNativeEventFilter(m_eventFilter);
+        delete m_eventFilter;
+    }
 #endif
 
 #ifdef USE_NEW_IMPLEMENTING
@@ -130,6 +135,7 @@ DPlatformIntegration::~DPlatformIntegration()
 
     if (m_xsettings) {
         delete m_xsettings;
+        m_xsettings = nullptr;
     }
 #endif
 }
@@ -284,6 +290,12 @@ void DPlatformIntegration::clearNativeSettings(quint32 settingWindow)
 #endif
 }
 
+void DPlatformIntegration::setWMClassName(const QByteArray &name)
+{
+    if (auto self = instance())
+        self->m_wmClass = name;
+}
+
 QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) const
 {
     qDebug() << __FUNCTION__ << window << window->type() << window->parent();
@@ -306,7 +318,7 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
     if (isNoTitlebar && DWMSupport::instance()->hasNoTitlebar()) {
         // 销毁旧的helper对象, 此处不用将mapped的值移除，后面会被覆盖
         if (DNoTitlebarWindowHelper *helper = DNoTitlebarWindowHelper::mapped.value(window)) {
-            helper->deleteLater();
+            delete helper;
         }
 
         QPlatformWindow *w = DPlatformIntegrationParent::createPlatformWindow(window);
@@ -402,6 +414,11 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
         }
     }
 
+    if (DBackingStoreProxy::useWallpaperPaint(window)) {
+        QPair<QRect, int> wallpaper_pair = window->property("_d_dxcb_wallpaper").value<QPair<QRect, int>>();
+        Utility::updateBackgroundWallpaper(w->winId(), wallpaper_pair.first, wallpaper_pair.second);
+    }
+
     return xw;
 }
 
@@ -411,10 +428,11 @@ QPlatformBackingStore *DPlatformIntegration::createPlatformBackingStore(QWindow 
 
     QPlatformBackingStore *store = DPlatformIntegrationParent::createPlatformBackingStore(window);
     bool useGLPaint = DBackingStoreProxy::useGLPaint(window);
+    bool useWallpaper = DBackingStoreProxy::useWallpaperPaint(window);
 
-    if (useGLPaint || window->property("_d_dxcb_overrideBackingStore").toBool()) {
+    if (useGLPaint || useWallpaper || window->property("_d_dxcb_overrideBackingStore").toBool()) {
         // delegate of BackingStore for hidpi
-        store = new DBackingStoreProxy(store, useGLPaint);
+        store = new DBackingStoreProxy(store, useGLPaint, useWallpaper);
         qInfo() << __FUNCTION__ << "enabled override backing store for:" << window;
     }
 
@@ -503,7 +521,7 @@ QStringList DPlatformIntegration::themeNames() const
     const QByteArray desktop_session = qgetenv("DESKTOP_SESSION");
 
     // 在lightdm环境中，无此环境变量
-    if (desktop_session.isEmpty() || desktop_session == "deepin")
+    if (desktop_session.isEmpty() || desktop_session.startsWith("deepin"))
         list.prepend("deepin");
 
     return list;
@@ -528,13 +546,6 @@ QVariant DPlatformIntegration::styleHint(QPlatformIntegration::StyleHint hint) c
     case MouseDoubleClickInterval:
         GET_VALID_XSETTINGS(XSETTINGS_DOUBLE_CLICK_TIME);
         break;
-    // QComboBox控件会根据此参数判断是应当在鼠标press还是release时弹出下拉列表
-    // 此值默认为false，QFontComboBox在第一次弹出时有些卡顿，然而，ComboBox本身
-    // 又会在收到Release事件时认为是对下拉列表进行了选中操作，卡顿会导致Release事件
-    // 传递给了下拉列表，因此会出现第一次弹出列表后又立即隐藏的行为。将触发列表弹出的
-    // 动作改为release则可避免此问题
-    case SetFocusOnTouchRelease:
-        return true;
     default:
         break;
     }
@@ -922,15 +933,16 @@ static void overrideChangeCursor(QPlatformCursor *cursorHandle, QCursor * cursor
 
 static void hookXcbCursor(QScreen *screen)
 {
-    if (screen && screen->handle())
-        VtableHook::overrideVfptrFun(screen->handle()->cursor(), &QPlatformCursor::changeCursor, &overrideChangeCursor);
+    // 解决切换光标主题，光标没有适配当前主题，显示错乱的问题
+    // if (screen && screen->handle())
+    //      VtableHook::overrideVfptrFun(screen->handle()->cursor(), &QPlatformCursor::changeCursor, &overrideChangeCursor);
 }
 #endif
 
-static bool hookDragObjectEventFilter(QObject *drag, QObject *o, QEvent *e)
+static bool hookDragObjectEventFilter(QBasicDrag *drag, QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::MouseMove) {
-        return static_cast<QBasicDrag*>(drag)->QBasicDrag::eventFilter(o, e);
+        return drag->QBasicDrag::eventFilter(o, e);
     }
 
     return VtableHook::callOriginalFun(drag, &QObject::eventFilter, o, e);
@@ -961,7 +973,11 @@ static void hookScreenGetWindow(QScreen *screen)
 
 static void watchScreenDPIChange(QScreen *screen)
 {
-    DPlatformIntegration::instance()->xSettings()->registerCallbackForProperty("Qt/DPI/" + screen->name().toLocal8Bit(), &DHighDpi::onDPIChanged, screen);
+    if (screen && screen->handle()) {
+        DPlatformIntegration::instance()->xSettings()->registerCallbackForProperty("Qt/DPI/" + screen->name().toLocal8Bit(), &DHighDpi::onDPIChanged, screen);
+    } else {
+        qWarning("screen or handle is nullptr!");
+    }
 }
 
 static void startDrag(QXcbDrag *drag)
@@ -980,8 +996,10 @@ static void startDrag(QXcbDrag *drag)
     if (actions.testFlag(Qt::LinkAction))
         support_actions << drag->atom(QXcbAtom::XdndActionLink);
 
-    if (support_actions.size() < 2)
-        return;
+    // 此处不能直接 return ,因为一个拖拽包含多种 actions 后再次拖拽单一 action 时需要将 property 更新, 否则单一 actoin 的拖拽会被强行改成
+    // 上一次的 actions, 导致某些小问题 (比如文管的拖拽行为不一致的问题)
+    //    if (support_actions.size() < 2)
+    //        return;
 
     xcb_change_property(drag->xcb_connection(), XCB_PROP_MODE_REPLACE, drag->connection()->clipboard()->m_owner,
                         drag->atom(QXcbAtom::XdndActionList), XCB_ATOM_ATOM, sizeof(xcb_atom_t) * 8,
@@ -1000,6 +1018,37 @@ void DPlatformIntegration::initialize()
     qApp->setProperty("_d_isDxcb", true);
 
     QXcbIntegration::initialize();
+
+    // 配置opengl渲染模块类型
+    QByteArray opengl_module_type = qgetenv("D_OPENGL_MODULE_TYPE");
+    if(!opengl_module_type.isEmpty()) {
+        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+        QSurfaceFormat::RenderableType module = opengl_module_type.contains("gles") ? QSurfaceFormat::OpenGLES :
+                                                                                      QSurfaceFormat::OpenGL;
+        format.setRenderableType(module);
+        QSurfaceFormat::setDefaultFormat(format);
+    }
+
+    // 适配虚拟键盘
+    if (DPlatformInputContextHook::instance()->isValid()) {
+        VtableHook::overrideVfptrFun(inputContext(),
+                                    &QPlatformInputContext::showInputPanel,
+                                    &DPlatformInputContextHook::showInputPanel);
+        VtableHook::overrideVfptrFun(inputContext(),
+                                    &QPlatformInputContext::hideInputPanel,
+                                    &DPlatformInputContextHook::hideInputPanel);
+        VtableHook::overrideVfptrFun(inputContext(),
+                                    &QPlatformInputContext::isInputPanelVisible,
+                                    &DPlatformInputContextHook::isInputPanelVisible);
+        VtableHook::overrideVfptrFun(inputContext(),
+                                    &QPlatformInputContext::keyboardRect,
+                                    &DPlatformInputContextHook::keyboardRect);
+
+        QObject::connect(DPlatformInputContextHook::instance(), &ComDeepinImInterface::geometryChanged,
+                             inputContext(), &QPlatformInputContext::emitKeyboardRectChanged);
+        QObject::connect(DPlatformInputContextHook::instance(), &ComDeepinImInterface::imActiveChanged,
+                             inputContext(), &QPlatformInputContext::emitInputPanelVisibleChanged);
+    }
 
 #ifdef Q_OS_LINUX
     m_eventFilter = new XcbNativeEventFilter(defaultConnection());
@@ -1043,7 +1092,7 @@ void DPlatformIntegration::initialize()
                                  this, &DPlatformIntegration::isWindowBlockedHandle);
 
     // FIXME(zccrs): 修复启动drag后鼠标从一块屏幕移动到另一块后图标窗口位置不对
-    VtableHook::overrideVfptrFun(static_cast<QBasicDrag*>(drag()), &QObject::eventFilter, &hookDragObjectEventFilter);
+    VtableHook::overrideVfptrFun(static_cast<QBasicDrag *>(drag()), &QBasicDrag::eventFilter, &hookDragObjectEventFilter);
 
     for (QScreen *s : qApp->screens()) {
         hookScreenGetWindow(s);
@@ -1059,6 +1108,19 @@ void DPlatformIntegration::initialize()
     if (DHighDpi::isActive()) {
         // 监听屏幕dpi变化
         QObject::connect(qApp, &QGuiApplication::screenAdded, qApp, &watchScreenDPIChange);
+    }
+
+    if (QGuiApplicationPrivate::instance()->platformIntegration()->services()->desktopEnvironment().toLower().endsWith("tablet")) {
+        m_pApplicationEventMonitor.reset(new DApplicationEventMonitor);
+
+        QObject::connect(m_pApplicationEventMonitor.data(), &DApplicationEventMonitor::lastInputDeviceTypeChanged, qApp, [this] {
+            // 这里为了不重复对g_desktopInputSelectionControl 做初始化设定, 做一个exists判定
+            if (!m_pDesktopInputSelectionControl && m_pApplicationEventMonitor->lastInputDeviceType() == DApplicationEventMonitor::TouchScreen) {
+                m_pDesktopInputSelectionControl.reset(new DDesktopInputSelectionControl(nullptr, qApp->inputMethod()));
+                m_pDesktopInputSelectionControl->createHandles();
+                m_pDesktopInputSelectionControl->setApplicationEventMonitor(m_pApplicationEventMonitor.data());
+            }
+        });
     }
 }
 
