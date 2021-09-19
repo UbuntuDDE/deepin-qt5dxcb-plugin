@@ -17,12 +17,14 @@
 
 #include "vtablehook.h"
 
+#include <QFileInfo>
 #include <algorithm>
 
 #ifdef Q_OS_LINUX
 #include <sys/mman.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <mutex>
 
 QT_BEGIN_NAMESPACE
 QFunctionPointer qt_linux_find_symbol_sys(const char *symbol);
@@ -35,6 +37,7 @@ DPP_BEGIN_NAMESPACE
 QMap<quintptr**, quintptr*> VtableHook::objToOriginalVfptr;
 QMap<const void*, quintptr*> VtableHook::objToGhostVfptr;
 QMap<const void*, quintptr> VtableHook::objDestructFun;
+static std::once_flag exitFlag;
 
 bool VtableHook::copyVtable(quintptr **obj)
 {
@@ -84,6 +87,14 @@ bool VtableHook::clearGhostVtable(const void *obj)
     }
 
     return false;
+}
+
+void VtableHook::clearAllGhostVtable()
+{
+    const QList<const void *> _objects = objToGhostVfptr.keys();
+
+    for (const void *_obj : _objects)
+        clearGhostVtable(_obj);
 }
 
 /*!
@@ -201,6 +212,9 @@ bool VtableHook::ensureVtable(const void *obj, std::function<void ()> destoryObj
     // 覆盖析构函数, 用于在对象析构时自动清理虚表
     new_vtable[index] = reinterpret_cast<quintptr>(&autoCleanVtable);
 
+    // TODO: 由于未知原因,有的虚表会自动还原，导致虚析构不能正常HOOK，无法释放new出来的新虚表数组
+    // 这里在程序退出时进行统一释放。后面知道详细原因再进行修改。
+    std::call_once(exitFlag, std::bind(atexit, clearAllGhostVtable));
     return true;
 }
 
@@ -283,17 +297,81 @@ quintptr VtableHook::originalFun(const void *obj, quintptr functionOffset)
     return *(vfptr_t2 + functionOffset / sizeof(quintptr));
 }
 
+#if defined(Q_OS_LINUX)
+static int readProtFromPsm(quintptr adr, size_t length)
+{
+    int prot = PROT_NONE;
+    QString fname = "/proc/self/maps";
+    QFile f(fname);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qFatal("%s", f.errorString().toStdString().data());
+        //return prot; // never be executed
+    }
+
+    QByteArray data = f.readAll();
+    bool ok = false;
+    quintptr startAddr = 0, endAddr = 0;
+    QTextStream ts(data);
+    while (Q_UNLIKELY(!ts.atEnd())) {
+        const QString line = ts.readLine();
+        const QStringList &maps = line.split(' ');
+        if (Q_UNLIKELY(maps.size() < 3)) {
+            continue;
+        }
+
+        //"00400000-00431000" "r--p"
+        const QStringList addrs = maps.value(0).split('-');
+        startAddr = addrs.value(0).toULongLong(&ok, 16);
+        Q_ASSERT(ok);
+        endAddr = addrs.value(1).toULongLong(&ok, 16);
+        Q_ASSERT(ok);
+        if (Q_LIKELY(adr >= endAddr)) {
+            continue;
+        }
+        if (adr >= startAddr && adr + length <= endAddr) {
+            QString ps = maps.value(1);
+            //qDebug() << maps.value(0) << maps.value(1);
+            for (QChar c : ps) {
+                switch (c.toLatin1()) {
+                case 'r':
+                    prot |= PROT_READ;
+                    break;
+                case 'w':
+                    prot |= PROT_WRITE;
+                    break;
+                case 'x':
+                    prot |= PROT_EXEC;
+                    break;
+                default:
+                    break; // '-' 'p' don't care
+                }
+            }
+            break;
+        } else if (adr < startAddr) {
+            qFatal("%p not found in proc maps", reinterpret_cast<void *>(adr));
+            //break; // 超出了地址不需要再去检查了
+        }
+    }
+
+    return prot;
+}
+#endif
+
 bool VtableHook::forceWriteMemory(void *adr, const void *data, size_t length)
 {
 #ifdef Q_OS_LINUX
-    //int page_size = sysconf(_SC_PAGESIZE);
-    int page_size = 4096; // fix 64k crashed
+    int page_size = sysconf(_SC_PAGESIZE);
     quintptr x = reinterpret_cast<quintptr>(adr);
-    void *new_adr = reinterpret_cast<void*>((x - page_size - 1) & ~(page_size -1));
+    // 不减去一个pagesize防止跨越两个数据区域(对应/proc/self/maps两行数据)
+    void *new_adr = reinterpret_cast<void *>((x /*- page_size - 1*/) & ~(page_size - 1));
     size_t override_data_length = length + x - reinterpret_cast<quintptr>(new_adr);
 
+    int oldProt = readProtFromPsm(quintptr(new_adr), override_data_length);
+    bool writeable = oldProt & PROT_WRITE;
+    // 增加判断是否已经可写，不能写才调用。
     // 失败时直接放弃
-    if (mprotect(new_adr, override_data_length, PROT_READ | PROT_WRITE)) {
+    if (!writeable && mprotect(new_adr, override_data_length, PROT_READ | PROT_WRITE)) {
+        qWarning() << "mprotect(change) failed" << strerror(errno);
         return false;
     }
 #endif
@@ -301,7 +379,10 @@ bool VtableHook::forceWriteMemory(void *adr, const void *data, size_t length)
     memcpy(adr, data, length);
 #ifdef Q_OS_LINUX
     // 恢复内存标志位
-    mprotect(new_adr, override_data_length, PROT_READ);
+    if (!writeable && mprotect(new_adr, override_data_length, oldProt)) {
+        qWarning() << "mprotect(restore) failed" << strerror(errno);
+        return false;
+    }
 #endif
 
     return true;

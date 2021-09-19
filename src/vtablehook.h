@@ -72,6 +72,12 @@ public:
     static bool hasVtable(const void *obj);
     static void resetVtable(const void *obj);
     static quintptr resetVfptrFun(const void *obj, quintptr functionOffset);
+    template <typename Fun> // for class
+    static inline quintptr resetVfptrFun(Fun fun)
+    {
+        typedef QtPrivate::FunctionPointer<Fun> FunInfo;
+        return resetVfptrFun(getVtableOfClass<typename FunInfo::Object>(), toQuintptr(&fun));
+    }
     static quintptr originalFun(const void *obj, quintptr functionOffset);
     static bool forceWriteMemory(void *adr, const void *data, size_t length);
     static QFunctionPointer resolve(const char *symbol);
@@ -282,6 +288,7 @@ public:
 private:
     static bool copyVtable(quintptr **obj);
     static bool clearGhostVtable(const void *obj);
+    static void clearAllGhostVtable();
 
     template<typename T>
     static void _destory_helper(const T *obj) {
